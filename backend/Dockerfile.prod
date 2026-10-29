@@ -1,0 +1,40 @@
+FROM python:3.13-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    libcairo2 \
+    libpango-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libffi-dev \
+    shared-mime-info \
+    fonts-dejavu-core \
+    fonts-liberation \
+    fonts-noto-core \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Vazirmatn font locally
+RUN mkdir -p /usr/local/share/fonts/vazirmatn && \
+    wget -O /tmp/vazirmatn.zip https://github.com/rastikerdar/vazirmatn/releases/download/v33.003/Vazirmatn-v33.003.zip && \
+    unzip /tmp/vazirmatn.zip -d /tmp/vazirmatn/ && \
+    cp /tmp/vazirmatn/fonts/ttf/*.ttf /usr/local/share/fonts/vazirmatn/ 2>/dev/null || cp /tmp/vazirmatn/ttf/*.ttf /usr/local/share/fonts/vazirmatn/ 2>/dev/null || true && \
+    fc-cache -fv && \
+    rm -rf /tmp/vazirmatn.zip /tmp/vazirmatn
+
+WORKDIR /app
+
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/
+
+RUN mkdir -p /app/media /app/staticfiles
+
+EXPOSE 8000
+
+CMD ["gunicorn", "gym_backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
