@@ -139,3 +139,19 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT['TOKEN_OBTAIN_SERIALIZER'] = 'gym_backend.custom_auth.CustomTokenObtainPairSerializer'
 
 AUTHENTICATION_BACKENDS = ['gym_backend.auth_backends.ActiveUserBackend']
+
+
+# --- Production behind nginx (HTTPS) ---
+import os as _os
+
+def _csv(name, default=""):
+    return [x.strip() for x in _os.environ.get(name, default).split(",") if x.strip()]
+
+if _os.environ.get("CSRF_TRUSTED_ORIGINS"):
+    CSRF_TRUSTED_ORIGINS = _csv("CSRF_TRUSTED_ORIGINS")
+if _os.environ.get("SECURE_PROXY_SSL_HEADER"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+SESSION_COOKIE_SECURE = _os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
+CSRF_COOKIE_SECURE = _os.environ.get("CSRF_COOKIE_SECURE", "False") == "True"
+SECURE_SSL_REDIRECT = _os.environ.get("SECURE_SSL_REDIRECT", "False") == "True"
