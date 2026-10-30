@@ -2,29 +2,26 @@ FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PIP_INDEX_URL=https://mirror-pypi.runflare.com/simple/
+ENV PIP_DEFAULT_TIMEOUT=60
 
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's|http://deb.debian.org|https://mirror.arvancloud.ir|g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     libcairo2 \
     libpango-1.0-0 \
+    libpangoft2-1.0-0 \
     libgdk-pixbuf-2.0-0 \
     libffi-dev \
     shared-mime-info \
     fonts-dejavu-core \
     fonts-liberation \
     fonts-noto-core \
-    wget \
-    unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Vazirmatn font locally
-RUN mkdir -p /usr/local/share/fonts/vazirmatn && \
-    wget -O /tmp/vazirmatn.zip https://github.com/rastikerdar/vazirmatn/releases/download/v33.003/Vazirmatn-v33.003.zip && \
-    unzip /tmp/vazirmatn.zip -d /tmp/vazirmatn/ && \
-    cp /tmp/vazirmatn/fonts/ttf/*.ttf /usr/local/share/fonts/vazirmatn/ 2>/dev/null || cp /tmp/vazirmatn/ttf/*.ttf /usr/local/share/fonts/vazirmatn/ 2>/dev/null || true && \
-    fc-cache -fv && \
-    rm -rf /tmp/vazirmatn.zip /tmp/vazirmatn
+COPY fonts/ /usr/local/share/fonts/vazirmatn/
+RUN fc-cache -f
 
 WORKDIR /app
 

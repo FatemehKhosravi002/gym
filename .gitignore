@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example*
+backend/.env.production
+certbot/
+backups/
+*.sqlite3
+.sentry-native/
