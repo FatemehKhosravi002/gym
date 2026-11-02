@@ -12,6 +12,8 @@ urlpatterns = [
     path('api/athletes/', include('apps.athletes.urls')),
     path('api/library/', include('apps.library.urls')),
     path('api/programs/', include('apps.programs.urls')),
+    path('api/program-days/', include('apps.programs.urls_days')),
+    path('api/program-items/', include('apps.programs.urls_items')),
     path('api/admin/', include('apps.admin_panel.urls')),
 ]
 
