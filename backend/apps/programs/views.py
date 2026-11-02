@@ -68,3 +68,34 @@ class ProgramViewSet(viewsets.ModelViewSet):
         if used and last_program:
             return Response({'used': True, 'program_id': last_program.id, 'program_number': last_program.sequence_number, 'program_title': last_program.title})
         return Response({'used': False})
+
+
+from apps.core.utils_jalali import gregorian_to_jalali_month_label
+from django.utils import timezone
+
+
+class ProgramViewSet(ProgramViewSet):
+    @action(detail=False, methods=['get'], url_path='duplicate_check')
+    def duplicate_check(self, request):
+        athlete_id = request.query_params.get('athlete_id')
+        exercise_id = request.query_params.get('exercise_id')
+        exclude_program = request.query_params.get('exclude_program')
+        if not athlete_id or not exercise_id:
+            return Response({'duplicate': False, 'used': False})
+        qs = Program.objects.filter(athlete_id=athlete_id, is_archived=False)
+        if exclude_program:
+            qs = qs.exclude(pk=exclude_program)
+        # include drafts and finals, ignore deleted
+        programs = qs.order_by('-created_at')
+        for p in programs:
+            if ProgramItem.objects.filter(program_day__program=p, exercise_id=exercise_id).exists():
+                return Response({
+                    'duplicate': True,
+                    'used': True,
+                    'program_id': p.id,
+                    'sequence_number': p.sequence_number,
+                    'date': p.start_date.isoformat() if p.start_date else '',
+                    'label': gregorian_to_jalali_month_label(p.start_date),
+                    'program_title': p.title
+                })
+        return Response({'duplicate': False, 'used': False})
