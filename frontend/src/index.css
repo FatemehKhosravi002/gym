@@ -48,3 +48,34 @@ input, textarea, select, button {
     transition-duration: 0.01ms !important;
   }
 }
+@import './styles/design-tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply bg-[#B6F500] text-[#0A0A0A] rounded-full px-6 py-3 font-semibold min-h-[48px] transition-transform active:scale-95;
+    box-shadow: 0 0 40px -10px rgba(182, 245, 0, 0.5);
+  }
+  .btn-glass {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 text-white rounded-full px-6 py-3 min-h-[48px] transition-transform active:scale-95;
+  }
+  .card {
+    @apply bg-[#141716] border border-white/10 rounded-[24px] p-4;
+    box-shadow: var(--shadow-soft);
+  }
+  .card-glass {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-[24px] p-4;
+  }
+  .input {
+    @apply bg-[#1B1F1D] border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-[#9AA3A0] min-h-[48px];
+  }
+  .chip {
+    @apply px-4 py-2 rounded-full border border-white/10 text-[#9AA3A0] min-h-[44px] transition-colors;
+  }
+  .chip-active {
+    @apply bg-[#B6F500] text-[#0A0A0A] border-transparent;
+  }
+}

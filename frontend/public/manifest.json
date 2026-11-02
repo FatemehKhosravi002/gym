@@ -1,11 +1,11 @@
 {
-  "name": "Gym Program Builder",
-  "short_name": "GymBuilder",
+  "name": "Physique",
+  "short_name": "Physique",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
   "lang": "fa",
   "dir": "rtl",
   "icons": [

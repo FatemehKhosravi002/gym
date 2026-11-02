@@ -7,20 +7,42 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Vazirmatn', 'Tahoma', 'Arial', 'sans-serif'],
+        sans: ['Sahel FD', 'Tahoma', 'sans-serif'],
       },
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#2563eb',
-          600: '#1d4ed8',
-          700: '#1e40af',
-        },
+        bg: '#0A0A0A',
+        surface1: '#141716',
+        surface2: '#1B1F1D',
+        surface3: '#232826',
+        accent: '#B6F500',
+        'accent-text': '#0A0A0A',
+        'text-primary': '#FFFFFF',
+        'text-secondary': '#9AA3A0',
       },
       borderRadius: {
-        'xl': '0.75rem',
-        '2xl': '1rem',
+        'xl': '24px',
+        '2xl': '28px',
+        'pill': '9999px',
+        'sheet': '32px',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
       },
     },
   },
