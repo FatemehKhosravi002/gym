@@ -4,12 +4,14 @@ import api from '../utils/api'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import Input from '../components/Input'
+import { toPersianDigits } from '../utils/persianDigits'
 
 export default function ProgramBuilder() {
   const { athleteId } = useParams()
   const navigate = useNavigate()
   const [step, setStep] = useState(1) // 1: days count, 2: builder wizard
   const [daysPerWeek, setDaysPerWeek] = useState(3)
+  const [selectedDays, setSelectedDays] = useState<number | null>(null)
   const [currentDay, setCurrentDay] = useState(1)
   const [program, setProgram] = useState<any>(null)
   const [days, setDays] = useState<any[]>([])
@@ -27,21 +29,21 @@ export default function ProgramBuilder() {
   }, [])
 
   const startProgram = async () => {
+    if (!selectedDays) return
+    setDaysPerWeek(selectedDays)
     try {
       const today = new Date().toISOString().split('T')[0]
       const res = await api.post('/programs/', {
         athlete: athleteId,
         title: `برنامه ${new Date().toLocaleDateString('fa-IR')}`,
         start_date: today,
-        days_per_week: daysPerWeek,
+        days_per_week: selectedDays,
         status: 'draft'
       })
       setProgram(res.data)
-      // Create days
       const dayList = []
-      for (let i = 1; i <= daysPerWeek; i++) {
+      for (let i = 1; i <= selectedDays; i++) {
         const dres = await api.post('/program-days/', { program: res.data.id, day_index: i, label: '' }).catch(async () => {
-          // try to create via program
           return null
         })
         dayList.push({ id: dres?.data?.id, day_index: i, items: [] })
@@ -55,7 +57,6 @@ export default function ProgramBuilder() {
   }
 
   const addExercise = async (ex: any) => {
-    // Check duplicates
     try {
       const check = await api.get(`/programs/duplicate_check/?athlete_id=${athleteId}&exercise_id=${ex.id}`)
       if (check.data.used) {
@@ -78,10 +79,8 @@ export default function ProgramBuilder() {
 
   const saveAndNext = async () => {
     if (currentItems.length === 0) return
-    // Save current day items to backend if we have day id
     const day = days.find(d => d.day_index === currentDay)
     if (day && program) {
-      // Try to save items
       for (let i = 0; i < currentItems.length; i++) {
         const it = currentItems[i]
         try {
@@ -103,7 +102,6 @@ export default function ProgramBuilder() {
       setSelectedCat(null)
       setSearchEx('')
     } else {
-      // Last day - go to review
       alert('برنامه با موفقیت ذخیره شد')
       navigate(`/athletes/${athleteId}`)
     }
@@ -117,18 +115,28 @@ export default function ProgramBuilder() {
 
   if (step === 1) {
     return (
-      <div className="space-y-6">
-        <h2 className="text-xl font-bold text-gray-900 text-center">این برنامه چند روزه است؟</h2>
-        <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
-          {[1,2,3,4,5,6,7].map(n => (
-            <button
-              key={n}
-              onClick={() => { setDaysPerWeek(n); startProgram(); }}
-              className="h-16 rounded-2xl bg-primary-600 text-white text-xl font-bold hover:bg-primary-700 min-h-[64px]"
-            >
-              {n}
-            </button>
-          ))}
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-md space-y-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">این برنامه چند روزه است؟</h2>
+          <div className="grid grid-cols-4 gap-3">
+            {[1,2,3,4,5,6,7].map(n => (
+              <button
+                key={n}
+                onClick={() => setSelectedDays(n)}
+                className={`h-16 sm:h-20 rounded-2xl text-xl sm:text-2xl font-bold min-h-[56px] border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                  selectedDays === n 
+                    ? 'bg-primary-600 text-white border-primary-600 shadow-md' 
+                    : 'bg-white text-gray-900 border-gray-300 hover:border-primary-400 hover:bg-primary-50'
+                }`}
+                aria-pressed={selectedDays === n}
+              >
+                {toPersianDigits(n)}
+              </button>
+            ))}
+          </div>
+          <Button onClick={startProgram} disabled={!selectedDays} className="w-full" size="lg">
+            ادامه
+          </Button>
         </div>
       </div>
     )
@@ -138,7 +146,7 @@ export default function ProgramBuilder() {
     <div className="pb-32">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-gray-900">روز {currentDay} از {daysPerWeek}</h2>
+          <h2 className="font-semibold text-gray-900">روز {toPersianDigits(currentDay)} از {toPersianDigits(daysPerWeek)}</h2>
         </div>
         <div className="flex gap-1">
           {Array.from({length: daysPerWeek}).map((_, i) => (
@@ -154,9 +162,9 @@ export default function ProgramBuilder() {
       <Card className="mb-4">
         <p className="font-medium mb-3 text-gray-900">انتخاب دسته‌بندی</p>
         <div className="flex flex-wrap gap-2 mb-3">
-          <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-gray-100'}`}>همه</button>
+          <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'}`}>همه</button>
           {categories.map(cat => (
-            <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-gray-100'}`}>{cat.name}</button>
+            <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'}`}>{cat.name}</button>
           ))}
         </div>
         <Input placeholder="جستجوی حرکت..." value={searchEx} onChange={(e) => setSearchEx(e.target.value)} />
@@ -165,7 +173,7 @@ export default function ProgramBuilder() {
             <button
               key={ex.id}
               onClick={() => addExercise(ex)}
-              className="w-full text-right p-3 bg-gray-50 rounded-xl hover:bg-gray-100 min-h-[44px] text-gray-900"
+              className="w-full text-right p-3 bg-gray-50 rounded-xl hover:bg-gray-100 min-h-[44px] text-gray-900 border border-gray-200"
             >
               {ex.name}
             </button>
@@ -178,11 +186,11 @@ export default function ProgramBuilder() {
           <p className="font-medium mb-3 text-gray-900">حرکات این روز</p>
           <div className="space-y-2">
             {currentItems.map((item, idx) => (
-              <div key={item.tempId || idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl">
-                <span className="text-sm text-gray-500 w-6">{idx + 1}</span>
+              <div key={item.tempId || idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-200">
+                <span className="text-sm text-gray-700 w-6">{toPersianDigits(idx + 1)}</span>
                 <span className="flex-1 text-sm text-gray-900">{item.exercise_detail?.name}</span>
                 <input
-                  className="w-12 px-2 py-1 border rounded text-center text-sm"
+                  className="w-12 px-2 py-1 border border-gray-300 rounded text-center text-sm text-gray-900 bg-white"
                   value={item.sets}
                   onChange={(e) => {
                     const newItems = [...currentItems]
@@ -190,9 +198,9 @@ export default function ProgramBuilder() {
                     setCurrentItems(newItems)
                   }}
                 />
-                <span>×</span>
+                <span className="text-gray-900">×</span>
                 <input
-                  className="w-16 px-2 py-1 border rounded text-center text-sm"
+                  className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm text-gray-900 bg-white"
                   value={item.reps}
                   onChange={(e) => {
                     const newItems = [...currentItems]
@@ -220,7 +228,7 @@ export default function ProgramBuilder() {
       {duplicateAlert && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4">
-            <p className="text-gray-900 mb-4">این حرکت قبلاً در برنامهٔ {duplicateAlert.info.program_number} ({duplicateAlert.info.program_title}) بوده است.</p>
+            <p className="text-gray-900 mb-4">این حرکت قبلاً در برنامهٔ {toPersianDigits(duplicateAlert.info.program_number)} ({duplicateAlert.info.program_title}) بوده است.</p>
             <div className="flex gap-2">
               <Button onClick={confirmAddDuplicate} className="flex-1">اضافه کن</Button>
               <Button variant="secondary" onClick={() => setDuplicateAlert(null)} className="flex-1">انصراف</Button>

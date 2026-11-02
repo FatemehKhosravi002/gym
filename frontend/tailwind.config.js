@@ -18,6 +18,18 @@ export default {
         'accent-text': '#0A0A0A',
         'text-primary': '#FFFFFF',
         'text-secondary': '#9AA3A0',
+        primary: {
+          50: '#f7ffe6',
+          100: '#edffcc',
+          200: '#dbff99',
+          300: '#c6f135',
+          400: '#b6f500',
+          500: '#B6F500',
+          600: '#9ad400',
+          700: '#7aa800',
+          800: '#5c7f00',
+          900: '#3d5400',
+        },
       },
       borderRadius: {
         'xl': '24px',
