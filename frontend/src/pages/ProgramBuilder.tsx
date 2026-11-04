@@ -23,11 +23,23 @@ export default function ProgramBuilder() {
   const [currentItems, setCurrentItems] = useState<any[]>([])
   const [dayLabel, setDayLabel] = useState('')
   const [duplicateAlert, setDuplicateAlert] = useState<any>(null)
+  const [showAddEx, setShowAddEx] = useState(false)
+  const [newExForm, setNewExForm] = useState({ name: '', category: '', video_url: '', description: '' })
+  const [newExErrors, setNewExErrors] = useState<any>({})
 
   useEffect(() => {
-    api.get('/library/categories/').then(res => setCategories(res.data.results || res.data))
-    api.get('/library/exercises/').then(res => setExercises(res.data.results || res.data))
+    loadCats()
+    loadExs()
   }, [])
+
+  const loadCats = async () => {
+    const res = await api.get('/library/categories/')
+    setCategories((res.data.results || res.data).filter((c:any)=>c.is_active!==false))
+  }
+  const loadExs = async () => {
+    const res = await api.get('/library/exercises/')
+    setExercises(res.data.results || res.data)
+  }
 
   const startProgram = async () => {
     if (!selectedDays) return
@@ -59,8 +71,28 @@ export default function ProgramBuilder() {
     }
   }
 
+  const createAndAddExercise = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setNewExErrors({})
+    try {
+      const res = await api.post('/library/exercises/', newExForm)
+      await loadExs()
+      setShowAddEx(false)
+      setNewExForm({ name: '', category: '', video_url: '', description: '' })
+      // add to current day
+      const ex = res.data
+      if (currentItems.find((it: any) => it.exercise === ex.id)) {
+        setDuplicateAlert({ sameDay: true, day: currentDay })
+      } else {
+        const newItem = { exercise: ex.id, exercise_detail: ex, sets: '3', reps: '10', order: currentItems.length, tempId: Date.now() }
+        setCurrentItems([...currentItems, newItem])
+      }
+    } catch (err: any) {
+      setNewExErrors(err.response?.data || {})
+    }
+  }
+
   const addExercise = async (ex: any) => {
-    // check same day
     if (currentItems.find((it: any) => it.exercise === ex.id)) {
       setDuplicateAlert({ sameDay: true, day: currentDay })
       return
@@ -72,9 +104,7 @@ export default function ProgramBuilder() {
         setDuplicateAlert({ exercise: ex, info: data })
         return
       }
-    } catch {
-      // if fails, still allow
-    }
+    } catch {}
     const newItem = { exercise: ex.id, exercise_detail: ex, sets: '3', reps: '10', order: currentItems.length, tempId: Date.now() }
     setCurrentItems([...currentItems, newItem])
   }
@@ -95,7 +125,7 @@ export default function ProgramBuilder() {
   const saveAndNext = async () => {
     if (currentItems.length === 0) return
     const day = days.find(d => d.day_index === currentDay)
-    if (day && program) {
+    if (day && program && day.id) {
       for (let i = 0; i < currentItems.length; i++) {
         const it = currentItems[i]
         try {
@@ -125,7 +155,7 @@ export default function ProgramBuilder() {
   const filteredEx = exercises.filter((e: any) => {
     const matchCat = selectedCat ? e.category === selectedCat : true
     const matchSearch = searchEx ? e.name.toLowerCase().includes(searchEx.toLowerCase()) : true
-    return matchCat && matchSearch && e.is_active
+    return matchCat && matchSearch && e.is_active !== false
   })
 
   if (step === 1) {
@@ -143,15 +173,12 @@ export default function ProgramBuilder() {
                     ? 'bg-primary-600 text-white border-primary-600 shadow-md' 
                     : 'bg-white text-gray-900 border-gray-300 hover:border-primary-400 hover:bg-primary-50'
                 }`}
-                aria-pressed={selectedDays === n}
               >
                 {toPersianDigits(n)}
               </button>
             ))}
           </div>
-          <Button onClick={startProgram} disabled={!selectedDays} className="w-full" size="lg">
-            ادامه
-          </Button>
+          <Button onClick={startProgram} disabled={!selectedDays} className="w-full" size="lg">ادامه</Button>
         </div>
       </div>
     )
@@ -175,7 +202,10 @@ export default function ProgramBuilder() {
       </Card>
 
       <Card className="mb-4">
-        <p className="font-medium mb-3 text-gray-900">انتخاب دسته‌بندی</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="font-medium text-gray-900">انتخاب حرکت</p>
+          <Button size="sm" onClick={() => setShowAddEx(true)}>افزودن حرکت جدید</Button>
+        </div>
         <div className="flex flex-wrap gap-2 mb-3">
           <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'}`}>همه</button>
           {categories.map(cat => (
@@ -184,7 +214,7 @@ export default function ProgramBuilder() {
         </div>
         <Input placeholder="جستجوی حرکت..." value={searchEx} onChange={(e) => setSearchEx(e.target.value)} />
         <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
-          {filteredEx.slice(0, 20).map(ex => (
+          {filteredEx.slice(0, 30).map(ex => (
             <button
               key={ex.id}
               onClick={() => addExercise(ex)}
@@ -241,6 +271,28 @@ export default function ProgramBuilder() {
                 </div>
               </>
             )}
+          </Card>
+        </div>
+      )}
+
+      {showAddEx && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+          <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="font-semibold mb-4 text-gray-900">افزودن حرکت جدید</h3>
+            <form onSubmit={createAndAddExercise} className="space-y-3">
+              <Input label="نام حرکت" value={newExForm.name} onChange={(e) => setNewExForm({...newExForm, name: e.target.value})} required />
+              {newExErrors.name && <p className="text-sm text-red-600">{Array.isArray(newExErrors.name) ? newExErrors.name[0] : newExErrors.name}</p>}
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-xl min-h-[44px] text-gray-900 bg-white" value={newExForm.category} onChange={(e) => setNewExForm({...newExForm, category: e.target.value})} required>
+                <option value="">انتخاب دسته‌بندی</option>
+                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+              </select>
+              {newExErrors.category && <p className="text-sm text-red-600">{Array.isArray(newExErrors.category) ? newExErrors.category[0] : newExErrors.category}</p>}
+              <Input label="لینک ویدیو (اختیاری)" value={newExForm.video_url} onChange={(e) => setNewExForm({...newExForm, video_url: e.target.value})} />
+              <div className="flex gap-2">
+                <Button type="submit" className="flex-1">ذخیره و افزودن</Button>
+                <Button type="button" variant="secondary" onClick={() => setShowAddEx(false)} className="flex-1">انصراف</Button>
+              </div>
+            </form>
           </Card>
         </div>
       )}

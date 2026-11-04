@@ -159,3 +159,19 @@ class ExerciseViewSet(ExerciseViewSet):
         ex.is_active = True
         ex.save()
         return Response({'status': 'restored'})
+
+
+class CategoryViewSet(CategoryViewSet):
+    @action(detail=True, methods=['post'])
+    def deactivate(self, request, pk=None):
+        cat = self.get_object()
+        cat.is_active = False
+        cat.save()
+        return Response({'status': 'deactivated'})
+
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
+        cat = self.get_object()
+        cat.is_active = True
+        cat.save()
+        return Response({'status': 'activated'})

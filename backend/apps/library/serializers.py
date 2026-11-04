@@ -48,3 +48,8 @@ class ExerciseSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError('نام حرکت الزامی است')
         return value
+
+
+class CategorySerializer(CategorySerializer):
+    class Meta(CategorySerializer.Meta):
+        fields = ['id', 'name', 'order', 'is_active', 'exercise_count']

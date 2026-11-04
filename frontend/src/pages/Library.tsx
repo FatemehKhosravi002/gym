@@ -18,6 +18,7 @@ export default function Library() {
   const [showInactive, setShowInactive] = useState(false)
   const [toast, setToast] = useState('')
   const [errors, setErrors] = useState<any>({})
+  const [showInactiveCats, setShowInactiveCats] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -25,7 +26,7 @@ export default function Library() {
 
   const loadData = async () => {
     const cats = await api.get('/library/categories/')
-    setCategories(cats.data.results || cats.data)
+    setCategories((cats.data.results || cats.data).filter((c: any) => showInactiveCats || c.is_active !== false))
     const exs = await api.get(`/library/exercises/?${showInactive ? 'include_inactive=1' : ''}`)
     setExercises(exs.data.results || exs.data)
   }
@@ -50,6 +51,28 @@ export default function Library() {
       showToast('نام دسته‌بندی تغییر یافت')
     } catch (err: any) {
       alert(err.response?.data?.name?.[0] || 'خطا')
+    }
+  }
+
+  const deactivateCategory = async (id: number) => {
+    try {
+      await api.post(`/library/categories/${id}/deactivate/`)
+      setMenuCat(null)
+      loadData()
+      showToast('دسته‌بندی غیرفعال شد')
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'خطا')
+    }
+  }
+
+  const activateCategory = async (id: number) => {
+    try {
+      await api.post(`/library/categories/${id}/activate/`)
+      setMenuCat(null)
+      loadData()
+      showToast('دسته‌بندی فعال شد')
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'خطا')
     }
   }
 
@@ -121,6 +144,8 @@ export default function Library() {
 
   const filtered = selectedCat ? exercises.filter((e: any) => e.category === selectedCat) : exercises
 
+  useEffect(() => { loadData() }, [showInactiveCats])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -135,11 +160,19 @@ export default function Library() {
         </form>
       </Card>
 
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-700">دسته‌بندی‌ها</p>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" checked={showInactiveCats} onChange={(e) => setShowInactiveCats(e.target.checked)} />
+          نمایش غیرفعال‌ها
+        </label>
+      </div>
+
       <div className="flex flex-wrap gap-2">
         <button onClick={() => setSelectedCat(null)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}>همه</button>
         {categories.map(cat => (
           <div key={cat.id} className="flex items-center gap-1">
-            <button onClick={() => setSelectedCat(cat.id)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-white border border-gray-300 text-gray-900'}`}>
+            <button onClick={() => setSelectedCat(cat.id)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-white border border-gray-300 text-gray-900'} ${cat.is_active === false ? 'opacity-60' : ''}`}>
               {cat.name} ({cat.exercise_count || 0})
             </button>
             <button onClick={() => setMenuCat(cat)} className="px-2 py-2 text-gray-700 min-h-[44px]">⋯</button>
@@ -177,6 +210,7 @@ export default function Library() {
             <h3 className="font-semibold mb-4 text-gray-900">{menuCat.name}</h3>
             <div className="space-y-2">
               <Button variant="secondary" className="w-full" onClick={() => { setEditingCat(menuCat); setMenuCat(null); }}>تغییر نام</Button>
+              {menuCat.is_active !== false ? <Button variant="secondary" className="w-full" onClick={() => deactivateCategory(menuCat.id)}>غیرفعال کردن</Button> : <Button variant="secondary" className="w-full" onClick={() => activateCategory(menuCat.id)}>فعال کردن</Button>}
               <Button variant="secondary" className="w-full text-red-600" onClick={() => { setDeleteCat(menuCat); setMenuCat(null); }}>حذف</Button>
               <Button variant="tertiary" className="w-full" onClick={() => setMenuCat(null)}>انصراف</Button>
             </div>
@@ -236,7 +270,7 @@ export default function Library() {
               {errors.name && <p className="text-sm text-red-600">{Array.isArray(errors.name) ? errors.name[0] : errors.name}</p>}
               <select className="w-full px-3 py-2 border border-gray-300 rounded-xl min-h-[44px] text-gray-900 bg-white" value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} required>
                 <option value="">انتخاب دسته‌بندی</option>
-                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                {categories.filter((c:any)=>c.is_active!==false).map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
               </select>
               {errors.category && <p className="text-sm text-red-600">{Array.isArray(errors.category) ? errors.category[0] : errors.category}</p>}
               <Input label="لینک ویدیو (اختیاری)" value={form.video_url} onChange={(e) => setForm({...form, video_url: e.target.value})} />

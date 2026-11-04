@@ -79,3 +79,9 @@ input, textarea, select, button {
     @apply bg-[#B6F500] text-[#0A0A0A] border-transparent;
   }
 }
+
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-fallback {
+    background: rgba(27, 31, 29, 0.95);
+  }
+}
