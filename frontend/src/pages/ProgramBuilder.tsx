@@ -243,7 +243,7 @@ export default function ProgramBuilder() {
         </Card>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-white/10 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#1B1F1D] border-t border-white/10 p-4">
         <div className="max-w-7xl mx-auto flex gap-2">
           {currentDay > 1 && <Button variant="secondary" onClick={() => { setCurrentDay(currentDay-1); setCurrentItems([]); }} className="flex-1">روز قبل</Button>}
           <Button onClick={saveAndNext} disabled={currentItems.length === 0} className="flex-1">

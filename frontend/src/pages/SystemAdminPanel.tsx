@@ -86,7 +86,7 @@ export default function SystemAdminPanel() {
       
       <div className="flex gap-2 overflow-x-auto">
         {[{k:'overview',l:'نمای کلی'},{k:'settings',l:'تنظیمات'},{k:'coaches',l:'مربی‌ها'}].map(t => (
-          <button key={t.k} onClick={() => setTab(t.k)} className={`px-4 py-2 rounded-xl min-h-[44px] whitespace-nowrap ${tab === t.k ? 'bg-primary-600 text-white' : 'bg-white border'}`}>{t.l}</button>
+          <button key={t.k} onClick={() => setTab(t.k)} className={`px-4 py-2 rounded-xl min-h-[44px] whitespace-nowrap ${tab === t.k ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] border'}`}>{t.l}</button>
         ))}
       </div>
 

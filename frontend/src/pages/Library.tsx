@@ -169,10 +169,10 @@ export default function Library() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => setSelectedCat(null)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-white border border-white/10 text-white'}`}>همه</button>
+        <button onClick={() => setSelectedCat(null)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] border border-white/10 text-white'}`}>همه</button>
         {categories.map(cat => (
           <div key={cat.id} className="flex items-center gap-1">
-            <button onClick={() => setSelectedCat(cat.id)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-white border border-white/10 text-white'} ${cat.is_active === false ? 'opacity-60' : ''}`}>
+            <button onClick={() => setSelectedCat(cat.id)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] border border-white/10 text-white'} ${cat.is_active === false ? 'opacity-60' : ''}`}>
               {cat.name} ({cat.exercise_count || 0})
             </button>
             <button onClick={() => setMenuCat(cat)} className="px-2 py-2 text-[#e5e7eb] min-h-[44px]">⋯</button>
