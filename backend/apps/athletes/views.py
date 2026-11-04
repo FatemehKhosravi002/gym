@@ -95,3 +95,25 @@ class ProfileMixin:
 
 class AthleteViewSet(AthleteViewSet, ProfileMixin):
     pass
+
+
+from .serializers import AthleteDetailSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+
+class AthleteViewSetFull(AthleteViewSet):
+    serializer_class = AthleteDetailSerializer
+
+
+class AthleteViewSet(AthleteViewSet):
+    serializer_class = AthleteDetailSerializer
+
+
+class AthleteViewSet(AthleteViewSet):
+    def get_serializer_class(self):
+        if self.action in ['update', 'partial_update']:
+            from .serializers import AthleteUpdateSerializer
+            return AthleteUpdateSerializer
+        from .serializers import AthleteDetailSerializer
+        return AthleteDetailSerializer
