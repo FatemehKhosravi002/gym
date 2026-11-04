@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#0F1110]">
-      <header className="bg-white border-b border-white/10 sticky top-0 z-10">
+      <header className="bg-[#141716] border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-lg font-bold text-white">Gym Program Builder</h1>
           <div className="flex items-center gap-3">
@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <nav className="bg-white border-b border-white/10">
+      <nav className="bg-[#141716] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto">
           {nav.map(item => (
             <Link
