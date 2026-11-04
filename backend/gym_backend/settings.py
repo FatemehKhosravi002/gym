@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'apps.library',
     'apps.programs',
     'apps.admin_panel',
+    'apps.program_templates',
 ]
 
 MIDDLEWARE = [
@@ -165,3 +166,4 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
+

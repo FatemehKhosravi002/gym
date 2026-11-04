@@ -16,14 +16,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1110]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       <header className="bg-[#141716] border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-white">Gym Program Builder</h1>
+          <Link to="/athletes" className="text-lg font-bold text-white hover:text-[#B6F500]">Physique</Link>
           <div className="flex items-center gap-3">
-            <span className="text-base text-[#d1d5db]">{user?.first_name || user?.username}</span>
-            <Link to="/change-password" className="text-base text-white hover:text-[#B6F500] min-h-[44px] flex items-center px-2">تغییر رمز عبور</Link>
-            <button onClick={logout} className="text-base text-white hover:text-[#B6F500] min-h-[44px] px-2">خروج</button>
+            <span className="text-sm text-white">{user?.first_name || user?.username}</span>
+            <Link to="/change-password" className="text-sm text-white hover:text-[#B6F500] min-h-[44px] flex items-center px-2">تغییر رمز عبور</Link>
+            <button onClick={logout} className="text-sm text-white hover:text-[#B6F500] min-h-[44px] px-2">خروج</button>
           </div>
         </div>
       </header>
@@ -44,7 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           ))}
         </div>
       </nav>
-      <main className="max-w-7xl mx-auto px-4 py-6 pb-20">
+      <main className="max-w-7xl mx-auto px-4 py-6 pb-20 text-white">
         {children}
       </main>
     </div>

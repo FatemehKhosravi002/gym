@@ -11,6 +11,7 @@ export default function Athletes() {
   const [loading, setLoading] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [form, setForm] = useState({ first_name: '', last_name: '', phone: '', notes: '' })
+  const [templates, setTemplates] = useState<any[]>([])
 
   const search = async (q: string) => {
     if (!q.trim()) {
@@ -31,6 +32,7 @@ export default function Athletes() {
   useEffect(() => {
     const t = setTimeout(() => search(query), 300)
     return () => clearTimeout(t)
+    api.get('/program-templates/').then(res => setTemplates(res.data.results || res.data)).catch(()=>{})
   }, [query])
 
   const createAthlete = async (e: React.FormEvent) => {
@@ -63,11 +65,11 @@ export default function Athletes() {
       <div className="space-y-2">
         {results.map(a => (
           <Link key={a.id} to={`/athletes/${a.id}`}>
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover:border-[#B6F500]/50 transition-colors">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-white">{a.first_name} {a.last_name}</p>
-                  <p className="text-sm text-[#9CA3AF]">کد: {a.unique_code}</p>
+                  <p className="text-sm text-[#d1d5db]">کد: {a.unique_code}</p>
                 </div>
               </div>
             </Card>
@@ -75,20 +77,29 @@ export default function Athletes() {
         ))}
       </div>
 
+      {templates.length > 0 && (
+        <Card>
+          <h3 className="font-bold text-white mb-3">قالب‌های آماده</h3>
+          <div className="space-y-2">
+            {templates.map(t => (
+              <div key={t.id} className="p-3 bg-[#1B1F1D] rounded-xl border border-white/10">
+                <p className="font-medium text-white">{t.name}</p>
+                <p className="text-sm text-[#9CA3AF]">{t.days_per_week} روز | {t.days?.length || 0} روز برنامه</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       {showNew && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
             <h3 className="font-semibold mb-4 text-white">افزودن ورزشکار جدید</h3>
             <form onSubmit={createAthlete} className="space-y-3">
               <Input label="نام" value={form.first_name} onChange={(e) => setForm({...form, first_name: e.target.value})} required />
               <Input label="نام خانوادگی" value={form.last_name} onChange={(e) => setForm({...form, last_name: e.target.value})} required />
               <Input label="تلفن (اختیاری)" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
-              <textarea
-                className="w-full px-3 py-2 border border-white/10 rounded-xl min-h-[80px]"
-                placeholder="یادداشت‌ها (اختیاری)"
-                value={form.notes}
-                onChange={(e) => setForm({...form, notes: e.target.value})}
-              />
+              <textarea className="w-full px-3 py-2 border border-white/10 rounded-xl min-h-[80px] bg-[#1B1F1D] text-white" placeholder="یادداشت‌ها (اختیاری)" value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} />
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">ذخیره</Button>
                 <Button type="button" variant="secondary" onClick={() => setShowNew(false)} className="flex-1">انصراف</Button>
