@@ -21,9 +21,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-lg font-bold text-white">Gym Program Builder</h1>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[#d1d5db]">{user?.first_name || user?.username}</span>
-            <Link to="/change-password" className="text-sm text-[#d1d5db] hover:text-white min-h-[44px] flex items-center px-2">تغییر رمز عبور</Link>
-            <button onClick={logout} className="text-sm text-[#d1d5db] hover:text-white min-h-[44px] px-2">خروج</button>
+            <span className="text-base text-[#d1d5db]">{user?.first_name || user?.username}</span>
+            <Link to="/change-password" className="text-base text-white hover:text-[#B6F500] min-h-[44px] flex items-center px-2">تغییر رمز عبور</Link>
+            <button onClick={logout} className="text-base text-white hover:text-[#B6F500] min-h-[44px] px-2">خروج</button>
           </div>
         </div>
       </header>
@@ -33,10 +33,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Link
               key={item.path}
               to={item.path}
-              className={`py-3 px-1 text-sm font-medium border-b-2 min-h-[44px] flex items-center whitespace-nowrap ${
+              className={`py-3 px-1 text-base font-medium border-b-2 min-h-[44px] flex items-center whitespace-nowrap ${
                 location.pathname === item.path
-                  ? 'border-primary-600 text-primary-600'
-                  : 'border-transparent text-[#d1d5db] hover:text-white'
+                  ? 'border-[#B6F500] text-[#B6F500]'
+                  : 'border-transparent text-white hover:text-[#B6F500]'
               }`}
             >
               {item.label}
