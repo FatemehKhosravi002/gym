@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Athletes from './pages/Athletes'
 import AthleteDetail from './pages/AthleteDetail'
 import ProgramBuilder from './pages/ProgramBuilder'
+import ProgramDetail from './pages/ProgramDetail'
 import Library from './pages/Library'
 import PublicProgram from './pages/PublicProgram'
 import InstallGuide from './pages/InstallGuide'
@@ -38,6 +39,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
         <Route path="/athletes" element={<PrivateRoute><Layout><Athletes /></Layout></PrivateRoute>} />
         <Route path="/athletes/:id" element={<PrivateRoute><Layout><AthleteDetail /></Layout></PrivateRoute>} />
+        <Route path="/programs/:id" element={<PrivateRoute><Layout><ProgramDetail /></Layout></PrivateRoute>} />
         <Route path="/programs/builder/:athleteId" element={<PrivateRoute><Layout><ProgramBuilder /></Layout></PrivateRoute>} />
         <Route path="/library" element={<PrivateRoute><Layout><Library /></Layout></PrivateRoute>} />
         <Route path="/pending-coaches" element={<PrivateRoute><Layout><PendingCoaches /></Layout></PrivateRoute>} />
