@@ -25,9 +25,9 @@ export default function AthleteDetail() {
   return (
     <div className="space-y-4">
       <Card>
-        <h2 className="text-xl font-bold text-gray-900">{athlete.first_name} {athlete.last_name}</h2>
-        <p className="text-sm text-gray-500">کد: {athlete.unique_code}</p>
-        {athlete.phone && <p className="text-sm text-gray-500">تلفن: {athlete.phone}</p>}
+        <h2 className="text-xl font-bold text-white">{athlete.first_name} {athlete.last_name}</h2>
+        <p className="text-sm text-[#9CA3AF]">کد: {athlete.unique_code}</p>
+        {athlete.phone && <p className="text-sm text-[#9CA3AF]">تلفن: {athlete.phone}</p>}
       </Card>
 
       <Link to={`/programs/builder/${id}`}>
@@ -35,13 +35,13 @@ export default function AthleteDetail() {
       </Link>
 
       <div className="space-y-2">
-        <h3 className="font-semibold text-gray-900">آخرین برنامه‌ها</h3>
+        <h3 className="font-semibold text-white">آخرین برنامه‌ها</h3>
         {latest.map(p => (
           <Card key={p.id}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">برنامه {p.sequence_number} - {p.title}</p>
-                <p className="text-sm text-gray-500">{p.start_date}</p>
+                <p className="font-medium text-white">برنامه {p.sequence_number} - {p.title}</p>
+                <p className="text-sm text-[#9CA3AF]">{p.start_date}</p>
               </div>
             </div>
           </Card>
@@ -50,12 +50,12 @@ export default function AthleteDetail() {
 
       {older.length > 0 && (
         <details className="space-y-2">
-          <summary className="font-semibold text-gray-900 cursor-pointer min-h-[44px] flex items-center">تاریخچه برنامه‌ها</summary>
+          <summary className="font-semibold text-white cursor-pointer min-h-[44px] flex items-center">تاریخچه برنامه‌ها</summary>
           <div className="space-y-2 mt-2">
             {older.map(p => (
               <Card key={p.id}>
-                <p className="font-medium text-gray-900">برنامه {p.sequence_number} - {p.title}</p>
-                <p className="text-sm text-gray-500">{p.start_date}</p>
+                <p className="font-medium text-white">برنامه {p.sequence_number} - {p.title}</p>
+                <p className="text-sm text-[#9CA3AF]">{p.start_date}</p>
               </Card>
             ))}
           </div>

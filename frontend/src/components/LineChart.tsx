@@ -4,7 +4,7 @@ interface Point {
 }
 
 export default function LineChart({ points }: { points: Point[] }) {
-  if (points.length === 0) return <p className="text-sm text-gray-500">داده‌ای موجود نیست</p>
+  if (points.length === 0) return <p className="text-sm text-[#9CA3AF]">داده‌ای موجود نیست</p>
   const max = Math.max(...points.map(p => p.y))
   const min = Math.min(...points.map(p => p.y))
   const range = max - min || 1

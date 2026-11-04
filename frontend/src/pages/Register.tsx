@@ -51,9 +51,9 @@ export default function Register() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">خوش آمدید!</h2>
-          <p className="text-gray-600 mb-6">ثبت‌نام با موفقیت انجام شد</p>
-          <p className="text-sm text-gray-500">در حال ورود...</p>
+          <h2 className="text-xl font-bold text-white mb-2">خوش آمدید!</h2>
+          <p className="text-[#d1d5db] mb-6">ثبت‌نام با موفقیت انجام شد</p>
+          <p className="text-sm text-[#9CA3AF]">در حال ورود...</p>
         </Card>
       </div>
     )
@@ -68,8 +68,8 @@ export default function Register() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">ثبت‌نام با موفقیت انجام شد</h2>
-          <p className="text-gray-600 mb-6">حساب شما ثبت شد و پس از تأیید ادمین سیستم فعال می‌شود.</p>
+          <h2 className="text-xl font-bold text-white mb-2">ثبت‌نام با موفقیت انجام شد</h2>
+          <p className="text-[#d1d5db] mb-6">حساب شما ثبت شد و پس از تأیید ادمین سیستم فعال می‌شود.</p>
           <Button onClick={() => navigate('/login')} className="w-full">بازگشت به صفحه ورود</Button>
         </Card>
       </div>
@@ -85,10 +85,10 @@ export default function Register() {
               <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold">GB</span>
               </div>
-              <span className="text-lg font-bold text-gray-900">Gym Program Builder</span>
+              <span className="text-lg font-bold text-white">Gym Program Builder</span>
             </Link>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">ثبت‌نام مربی</h2>
-            <p className="text-gray-600">اطلاعات خود را وارد کنید</p>
+            <h2 className="text-2xl font-bold text-white mb-2">ثبت‌نام مربی</h2>
+            <p className="text-[#d1d5db]">اطلاعات خود را وارد کنید</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -106,7 +106,7 @@ export default function Register() {
             
             <PasswordInput label="رمز عبور" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} required autoComplete="new-password" />
             {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
-            <p className="text-xs text-gray-500 -mt-2">حداقل ۸ کاراکتر، شامل حروف و اعداد</p>
+            <p className="text-xs text-[#9CA3AF] -mt-2">حداقل ۸ کاراکتر، شامل حروف و اعداد</p>
             
             <PasswordInput label="تکرار رمز عبور" value={form.confirm_password} onChange={(e) => setForm({...form, confirm_password: e.target.value})} required />
             {errors.confirm_password && <p className="text-sm text-red-600">{errors.confirm_password}</p>}

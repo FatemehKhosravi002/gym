@@ -162,7 +162,7 @@ export default function ProgramBuilder() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-md space-y-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">این برنامه چند روزه است؟</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white text-center">این برنامه چند روزه است؟</h2>
           <div className="grid grid-cols-4 gap-3">
             {[1,2,3,4,5,6,7].map(n => (
               <button
@@ -171,7 +171,7 @@ export default function ProgramBuilder() {
                 className={`h-16 sm:h-20 rounded-2xl text-xl sm:text-2xl font-bold min-h-[56px] border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                   selectedDays === n 
                     ? 'bg-primary-600 text-white border-primary-600 shadow-md' 
-                    : 'bg-white text-gray-900 border-gray-300 hover:border-primary-400 hover:bg-primary-50'
+                    : 'bg-white text-white border-white/10 hover:border-primary-400 hover:bg-primary-50'
                 }`}
               >
                 {toPersianDigits(n)}
@@ -188,7 +188,7 @@ export default function ProgramBuilder() {
     <div className="pb-32">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-gray-900">روز {toPersianDigits(currentDay)} از {toPersianDigits(daysPerWeek)}</h2>
+          <h2 className="font-semibold text-white">روز {toPersianDigits(currentDay)} از {toPersianDigits(daysPerWeek)}</h2>
         </div>
         <div className="flex gap-1">
           {Array.from({length: daysPerWeek}).map((_, i) => (
@@ -203,13 +203,13 @@ export default function ProgramBuilder() {
 
       <Card className="mb-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="font-medium text-gray-900">انتخاب حرکت</p>
+          <p className="font-medium text-white">انتخاب حرکت</p>
           <Button size="sm" onClick={() => setShowAddEx(true)}>افزودن حرکت جدید</Button>
         </div>
         <div className="flex flex-wrap gap-2 mb-3">
-          <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'}`}>همه</button>
+          <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] text-white'}`}>همه</button>
           {categories.map(cat => (
-            <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'}`}>{cat.name}</button>
+            <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] text-white'}`}>{cat.name}</button>
           ))}
         </div>
         <Input placeholder="جستجوی حرکت..." value={searchEx} onChange={(e) => setSearchEx(e.target.value)} />
@@ -218,7 +218,7 @@ export default function ProgramBuilder() {
             <button
               key={ex.id}
               onClick={() => addExercise(ex)}
-              className="w-full text-right p-3 bg-gray-50 rounded-xl hover:bg-gray-100 min-h-[44px] text-gray-900 border border-gray-200"
+              className="w-full text-right p-3 bg-[#0F1110] rounded-xl hover:bg-[#1B1F1D] min-h-[44px] text-white border border-white/10"
             >
               {ex.name}
             </button>
@@ -228,22 +228,22 @@ export default function ProgramBuilder() {
 
       {currentItems.length > 0 && (
         <Card className="mb-4">
-          <p className="font-medium mb-3 text-gray-900">حرکات این روز</p>
+          <p className="font-medium mb-3 text-white">حرکات این روز</p>
           <div className="space-y-2">
             {currentItems.map((item, idx) => (
-              <div key={item.tempId || idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-200">
-                <span className="text-sm text-gray-700 w-6">{toPersianDigits(idx + 1)}</span>
-                <span className="flex-1 text-sm text-gray-900">{item.exercise_detail?.name}</span>
-                <input className="w-12 px-2 py-1 border border-gray-300 rounded text-center text-sm text-gray-900 bg-white" value={item.sets} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].sets=e.target.value; setCurrentItems(newItems); }} />
-                <span className="text-gray-900">×</span>
-                <input className="w-16 px-2 py-1 border border-gray-300 rounded text-center text-sm text-gray-900 bg-white" value={item.reps} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].reps=e.target.value; setCurrentItems(newItems); }} />
+              <div key={item.tempId || idx} className="flex items-center gap-2 p-2 bg-[#0F1110] rounded-xl border border-white/10">
+                <span className="text-sm text-[#e5e7eb] w-6">{toPersianDigits(idx + 1)}</span>
+                <span className="flex-1 text-sm text-white">{item.exercise_detail?.name}</span>
+                <input className="w-12 px-2 py-1 border border-white/10 rounded text-center text-sm text-white bg-[#141716]" value={item.sets} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].sets=e.target.value; setCurrentItems(newItems); }} />
+                <span className="text-white">×</span>
+                <input className="w-16 px-2 py-1 border border-white/10 rounded text-center text-sm text-white bg-[#141716]" value={item.reps} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].reps=e.target.value; setCurrentItems(newItems); }} />
               </div>
             ))}
           </div>
         </Card>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-white/10 p-4">
         <div className="max-w-7xl mx-auto flex gap-2">
           {currentDay > 1 && <Button variant="secondary" onClick={() => { setCurrentDay(currentDay-1); setCurrentItems([]); }} className="flex-1">روز قبل</Button>}
           <Button onClick={saveAndNext} disabled={currentItems.length === 0} className="flex-1">
@@ -257,14 +257,14 @@ export default function ProgramBuilder() {
           <Card className="w-full sm:max-w-md m-4">
             {duplicateAlert.sameDay ? (
               <>
-                <p className="text-gray-900 mb-4">این حرکت در روز {toPersianDigits(duplicateAlert.day)} همین برنامه هم هست</p>
+                <p className="text-white mb-4">این حرکت در روز {toPersianDigits(duplicateAlert.day)} همین برنامه هم هست</p>
                 <div className="flex gap-2">
                   <Button variant="secondary" onClick={() => setDuplicateAlert(null)} className="flex-1">انصراف</Button>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-gray-900 mb-4">این حرکت قبلاً در برنامهٔ {toPersianDigits(duplicateAlert.info.sequence_number || duplicateAlert.info.program_number)} ({duplicateAlert.info.label || toJalaliMonth(duplicateAlert.info.date)}) بوده است</p>
+                <p className="text-white mb-4">این حرکت قبلاً در برنامهٔ {toPersianDigits(duplicateAlert.info.sequence_number || duplicateAlert.info.program_number)} ({duplicateAlert.info.label || toJalaliMonth(duplicateAlert.info.date)}) بوده است</p>
                 <div className="flex gap-2">
                   <Button onClick={confirmAddDuplicate} className="flex-1">اضافه کن</Button>
                   <Button variant="secondary" onClick={() => setDuplicateAlert(null)} className="flex-1">انصراف</Button>
@@ -278,11 +278,11 @@ export default function ProgramBuilder() {
       {showAddEx && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="font-semibold mb-4 text-gray-900">افزودن حرکت جدید</h3>
+            <h3 className="font-semibold mb-4 text-white">افزودن حرکت جدید</h3>
             <form onSubmit={createAndAddExercise} className="space-y-3">
               <Input label="نام حرکت" value={newExForm.name} onChange={(e) => setNewExForm({...newExForm, name: e.target.value})} required />
               {newExErrors.name && <p className="text-sm text-red-600">{Array.isArray(newExErrors.name) ? newExErrors.name[0] : newExErrors.name}</p>}
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-xl min-h-[44px] text-gray-900 bg-white" value={newExForm.category} onChange={(e) => setNewExForm({...newExForm, category: e.target.value})} required>
+              <select className="w-full px-3 py-2 border border-white/10 rounded-xl min-h-[44px] text-white bg-[#141716]" value={newExForm.category} onChange={(e) => setNewExForm({...newExForm, category: e.target.value})} required>
                 <option value="">انتخاب دسته‌بندی</option>
                 {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
               </select>

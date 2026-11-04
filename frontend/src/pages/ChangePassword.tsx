@@ -33,24 +33,24 @@ export default function ChangePassword() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4" dir="rtl">
+      <div className="min-h-screen bg-[#0F1110] flex items-center justify-center px-4" dir="rtl">
         <Card className="w-full max-w-md text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">رمز عبور تغییر یافت</h2>
-          <p className="text-gray-600">در حال انتقال...</p>
+          <h2 className="text-xl font-bold text-white mb-2">رمز عبور تغییر یافت</h2>
+          <p className="text-[#d1d5db]">در حال انتقال...</p>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4" dir="rtl">
+    <div className="min-h-screen bg-[#0F1110] flex items-center justify-center px-4" dir="rtl">
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-bold text-gray-900 mb-6">تغییر رمز عبور</h1>
+        <h1 className="text-xl font-bold text-white mb-6">تغییر رمز عبور</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <PasswordInput
             label="رمز عبور فعلی"

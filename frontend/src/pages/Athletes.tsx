@@ -48,7 +48,7 @@ export default function Athletes() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">ورزشکاران</h2>
+        <h2 className="text-xl font-bold text-white">ورزشکاران</h2>
         <Button onClick={() => setShowNew(true)}>ورزشکار جدید</Button>
       </div>
 
@@ -58,7 +58,7 @@ export default function Athletes() {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {loading && <p className="text-sm text-gray-500">در حال جستجو...</p>}
+      {loading && <p className="text-sm text-[#9CA3AF]">در حال جستجو...</p>}
 
       <div className="space-y-2">
         {results.map(a => (
@@ -66,8 +66,8 @@ export default function Athletes() {
             <Card className="hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-900">{a.first_name} {a.last_name}</p>
-                  <p className="text-sm text-gray-500">کد: {a.unique_code}</p>
+                  <p className="font-medium text-white">{a.first_name} {a.last_name}</p>
+                  <p className="text-sm text-[#9CA3AF]">کد: {a.unique_code}</p>
                 </div>
               </div>
             </Card>
@@ -78,13 +78,13 @@ export default function Athletes() {
       {showNew && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="font-semibold mb-4 text-gray-900">افزودن ورزشکار جدید</h3>
+            <h3 className="font-semibold mb-4 text-white">افزودن ورزشکار جدید</h3>
             <form onSubmit={createAthlete} className="space-y-3">
               <Input label="نام" value={form.first_name} onChange={(e) => setForm({...form, first_name: e.target.value})} required />
               <Input label="نام خانوادگی" value={form.last_name} onChange={(e) => setForm({...form, last_name: e.target.value})} required />
               <Input label="تلفن (اختیاری)" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl min-h-[80px]"
+                className="w-full px-3 py-2 border border-white/10 rounded-xl min-h-[80px]"
                 placeholder="یادداشت‌ها (اختیاری)"
                 value={form.notes}
                 onChange={(e) => setForm({...form, notes: e.target.value})}

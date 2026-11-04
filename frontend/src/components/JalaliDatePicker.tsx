@@ -21,11 +21,11 @@ export default function JalaliDatePicker({ value, onChange, label }: Props) {
 
   return (
     <div className="w-full">
-      {label && <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>}
+      {label && <label className="block text-sm font-medium text-[#e5e7eb] mb-1.5">{label}</label>}
       <button
         type="button"
         onClick={() => setShow(!show)}
-        className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-right min-h-[48px] bg-white"
+        className="w-full px-3 py-2.5 border border-white/10 rounded-xl text-right min-h-[48px] bg-[#141716]"
       >
         {value ? value : 'انتخاب تاریخ'}
       </button>

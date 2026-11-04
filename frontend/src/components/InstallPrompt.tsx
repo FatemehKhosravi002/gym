@@ -44,17 +44,17 @@ export default function InstallPrompt() {
 
   if (isIOS) {
     return (
-      <div className="fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4 z-50" dir="rtl">
+      <div className="fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-white/10 p-4 z-50" dir="rtl">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold">GB</span>
           </div>
           <div className="flex-1">
-            <p className="font-medium text-gray-900 mb-1">نصب اپ روی گوشی</p>
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="font-medium text-white mb-1">نصب اپ روی گوشی</p>
+            <p className="text-sm text-[#d1d5db] mb-2">
               روی دکمه اشتراک‌گذاری <span className="inline-block">⬆️</span> ضربه بزنید و سپس «افزودن به صفحه اصلی» را انتخاب کنید
             </p>
-            <button onClick={() => setShowInstall(false)} className="text-sm text-gray-500">بستن</button>
+            <button onClick={() => setShowInstall(false)} className="text-sm text-[#9CA3AF]">بستن</button>
           </div>
         </div>
       </div>
@@ -62,17 +62,17 @@ export default function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4 z-50" dir="rtl">
+    <div className="fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-lg border border-white/10 p-4 z-50" dir="rtl">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center flex-shrink-0">
           <span className="text-white font-bold">GB</span>
         </div>
         <div className="flex-1">
-          <p className="font-medium text-gray-900">نصب اپ Gym Program Builder</p>
-          <p className="text-sm text-gray-600">دسترسی سریع‌تر از صفحه اصلی</p>
+          <p className="font-medium text-white">نصب اپ Gym Program Builder</p>
+          <p className="text-sm text-[#d1d5db]">دسترسی سریع‌تر از صفحه اصلی</p>
         </div>
         <Button onClick={handleInstall} size="sm">نصب اپ</Button>
-        <button onClick={() => setShowInstall(false)} className="text-gray-400 hover:text-gray-600 px-2">✕</button>
+        <button onClick={() => setShowInstall(false)} className="text-gray-400 hover:text-[#d1d5db] px-2">✕</button>
       </div>
     </div>
   )

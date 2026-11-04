@@ -1,0 +1,65 @@
+:root {
+  --bg: #0A0A0A;
+  --bg-2: #0F1110;
+  --surface-1: #141716;
+  --surface-2: #1B1F1D;
+  --surface-3: #232826;
+  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #FFFFFF;
+  --text-secondary: #9AA3A0;
+  --accent: #B6F500;
+  --accent-text: #0A0A0A;
+  --danger: #FF4D4F;
+  
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-pill: 9999px;
+  --radius-sheet: 32px;
+  
+  --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
+  --shadow-glow: 0 0 80px -20px rgba(182, 245, 0, 0.4);
+  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+@font-face {
+  font-family: 'Sahel FD';
+  src: url('/fonts/Sahel-FD.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sahel FD';
+  src: url('/fonts/Sahel-Light-FD.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sahel FD';
+  src: url('/fonts/Sahel-SemiBold-FD.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sahel FD';
+  src: url('/fonts/Sahel-Bold-FD.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sahel FD';
+  src: url('/fonts/Sahel-Black-FD.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}

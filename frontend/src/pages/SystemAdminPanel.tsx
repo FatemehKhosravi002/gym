@@ -82,7 +82,7 @@ export default function SystemAdminPanel() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-gray-900">پنل ادمین سیستم</h2>
+      <h2 className="text-xl font-bold text-white">پنل ادمین سیستم</h2>
       
       <div className="flex gap-2 overflow-x-auto">
         {[{k:'overview',l:'نمای کلی'},{k:'settings',l:'تنظیمات'},{k:'coaches',l:'مربی‌ها'}].map(t => (
@@ -92,11 +92,11 @@ export default function SystemAdminPanel() {
 
       {tab === 'overview' && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.coaches_count || 0}</p><p className="text-sm text-gray-600">مربی‌ها</p></Card>
-          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.athletes_count || 0}</p><p className="text-sm text-gray-600">ورزشکاران</p></Card>
-          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.programs_count || 0}</p><p className="text-sm text-gray-600">برنامه‌ها</p></Card>
-          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.programs_this_month || 0}</p><p className="text-sm text-gray-600">برنامه این ماه</p></Card>
-          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.new_coaches_7_days || 0}</p><p className="text-sm text-gray-600">مربی جدید ۷ روز</p></Card>
+          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.coaches_count || 0}</p><p className="text-sm text-[#d1d5db]">مربی‌ها</p></Card>
+          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.athletes_count || 0}</p><p className="text-sm text-[#d1d5db]">ورزشکاران</p></Card>
+          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.programs_count || 0}</p><p className="text-sm text-[#d1d5db]">برنامه‌ها</p></Card>
+          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.programs_this_month || 0}</p><p className="text-sm text-[#d1d5db]">برنامه این ماه</p></Card>
+          <Card className="text-center"><p className="text-2xl font-bold text-primary-600">{overview.new_coaches_7_days || 0}</p><p className="text-sm text-[#d1d5db]">مربی جدید ۷ روز</p></Card>
         </div>
       )}
 
@@ -104,8 +104,8 @@ export default function SystemAdminPanel() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900">ثبت‌نام مربی‌ها نیاز به تأیید ادمین سیستم دارد</p>
-              <p className="text-sm text-gray-600 mt-1">در صورت فعال بودن، مربی‌های جدید پس از ثبت‌نام تا تأیید نمی‌توانند وارد شوند</p>
+              <p className="font-medium text-white">ثبت‌نام مربی‌ها نیاز به تأیید ادمین سیستم دارد</p>
+              <p className="text-sm text-[#d1d5db] mt-1">در صورت فعال بودن، مربی‌های جدید پس از ثبت‌نام تا تأیید نمی‌توانند وارد شوند</p>
             </div>
             <button onClick={toggleSetting} className={`w-12 h-6 rounded-full transition-colors ${settings.registration_requires_approval ? 'bg-primary-600' : 'bg-gray-300'}`}>
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${settings.registration_requires_approval ? '-translate-x-6' : '-translate-x-1'}`} />
@@ -130,9 +130,9 @@ export default function SystemAdminPanel() {
               <Card key={c.id}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{c.first_name} {c.last_name} (@{c.username})</p>
-                    <p className="text-sm text-gray-500">{c.phone || '-'} | ورزشکاران: {c.athletes_count} | برنامه‌ها: {c.programs_count}</p>
-                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${c.is_approved && c.is_active ? 'bg-green-100 text-green-800' : c.is_approved ? 'bg-gray-100 text-gray-800' : 'bg-amber-100 text-amber-800'}`}>
+                    <p className="font-medium text-white">{c.first_name} {c.last_name} (@{c.username})</p>
+                    <p className="text-sm text-[#9CA3AF]">{c.phone || '-'} | ورزشکاران: {c.athletes_count} | برنامه‌ها: {c.programs_count}</p>
+                    <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${c.is_approved && c.is_active ? 'bg-green-100 text-green-800' : c.is_approved ? 'bg-[#1B1F1D] text-white' : 'bg-amber-100 text-amber-800'}`}>
                       {c.is_approved && c.is_active ? 'فعال' : !c.is_active ? 'غیرفعال' : 'در انتظار تأیید'}
                     </span>
                   </div>
@@ -152,9 +152,9 @@ export default function SystemAdminPanel() {
       {tempPass.show && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <Card className="w-full max-w-md">
-            <h3 className="font-bold text-gray-900 mb-4">رمز موقت تولید شد</h3>
+            <h3 className="font-bold text-white mb-4">رمز موقت تولید شد</h3>
             <p className="text-sm text-red-600 mb-3">این رمز فقط یک‌بار نمایش داده می‌شود</p>
-            <div className="bg-gray-100 p-3 rounded-xl font-mono text-center text-lg mb-4 select-all">{tempPass.pass}</div>
+            <div className="bg-[#1B1F1D] p-3 rounded-xl font-mono text-center text-lg mb-4 select-all">{tempPass.pass}</div>
             <div className="flex gap-2">
               <Button onClick={copyPass} className="flex-1">کپی رمز</Button>
               <Button variant="secondary" onClick={() => setTempPass({show: false, pass: ''})} className="flex-1">بستن</Button>

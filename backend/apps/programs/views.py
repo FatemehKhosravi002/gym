@@ -99,3 +99,28 @@ class ProgramViewSet(ProgramViewSet):
                     'program_title': p.title
                 })
         return Response({'duplicate': False, 'used': False})
+
+
+class ProgramViewSet(ProgramViewSet):
+    @action(detail=False, methods=['get'], url_path='exercise_history')
+    def exercise_history(self, request):
+        athlete_id = request.query_params.get('athlete_id')
+        exercise_id = request.query_params.get('exercise_id')
+        exclude_program = request.query_params.get('exclude_program')
+        if not athlete_id or not exercise_id:
+            return Response({'used': False, 'programs': []})
+        qs = Program.objects.filter(athlete_id=athlete_id, is_archived=False)
+        if exclude_program:
+            qs = qs.exclude(pk=exclude_program)
+        results = []
+        for p in qs.order_by('-sequence_number'):
+            if ProgramItem.objects.filter(program_day__program=p, exercise_id=exercise_id).exists():
+                from apps.core.utils_jalali import gregorian_to_jalali_month_label
+                results.append({
+                    'program_id': p.id,
+                    'sequence_number': p.sequence_number,
+                    'title': p.title,
+                    'date': p.start_date.isoformat() if p.start_date else '',
+                    'label': gregorian_to_jalali_month_label(p.start_date),
+                })
+        return Response({'used': len(results) > 0, 'programs': results})
