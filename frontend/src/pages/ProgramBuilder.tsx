@@ -5,7 +5,8 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import Input from '../components/Input'
 import { toPersianDigits } from '../utils/persianDigits'
-import { toJalaliMonth } from '../utils/jalali'
+import { toJalaliMonth, toJalali } from '../utils/jalali'
+import JalaliDatePicker from '../components/JalaliDatePicker'
 
 export default function ProgramBuilder() {
   const { athleteId } = useParams()
@@ -275,7 +276,7 @@ export default function ProgramBuilder() {
             <form onSubmit={saveMeasurement} className="space-y-3">
               <Input label="وزن (کیلوگرم)" value={measureForm.weight_kg} onChange={(e) => setMeasureForm({...measureForm, weight_kg: e.target.value})} required />
               <Input label="قد (سانتی‌متر)" value={measureForm.height_cm} onChange={(e) => setMeasureForm({...measureForm, height_cm: e.target.value})} />
-              <Input label="تاریخ" type="date" value={measureForm.date} onChange={(e) => setMeasureForm({...measureForm, date: e.target.value})} required />
+<JalaliDatePicker label="تاریخ" value={measureForm.date} onChange={(v) => setMeasureForm({...measureForm, date: v})} />
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">ذخیره</Button>
                 <Button type="button" variant="secondary" onClick={() => setShowMeasure(false)} className="flex-1">انصراف</Button>

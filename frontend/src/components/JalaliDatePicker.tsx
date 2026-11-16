@@ -38,3 +38,13 @@ export default function JalaliDatePicker({ value, onChange, label }: Props) {
     </div>
   )
 }
+
+
+export function getTodayJalaliString() {
+  const d = new Date()
+  const j = require('jalaali-js').toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate())
+  const months = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+  const dj = j.jd.toString().replace(/\d/g, (x: string) => '۰۱۲۳۴۵۶۷۸۹'[parseInt(x)])
+  const jy = j.jy.toString().replace(/\d/g, (x: string) => '۰۱۲۳۴۵۶۷۸۹'[parseInt(x)])
+  return `${dj} ${months[j.jm]} ${jy}`
+}
