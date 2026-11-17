@@ -5,7 +5,7 @@ import Button from '../components/Button'
 import Card from '../components/Card'
 import Input from '../components/Input'
 import { toPersianDigits } from '../utils/persianDigits'
-import { toJalaliMonth, toJalali } from '../utils/jalali'
+import { toJalaliMonth } from '../utils/jalali'
 import JalaliDatePicker from '../components/JalaliDatePicker'
 
 export default function ProgramBuilder() {

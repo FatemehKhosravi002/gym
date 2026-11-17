@@ -7,6 +7,8 @@ import Athletes from './pages/Athletes'
 import AthleteDetail from './pages/AthleteDetail'
 import ProgramBuilder from './pages/ProgramBuilder'
 import ProgramDetail from './pages/ProgramDetail'
+import ProgramEdit from './pages/ProgramEdit'
+import Templates from './pages/Templates'
 import Library from './pages/Library'
 import PublicProgram from './pages/PublicProgram'
 import InstallGuide from './pages/InstallGuide'
@@ -40,6 +42,10 @@ function AppRoutes() {
         <Route path="/athletes" element={<PrivateRoute><Layout><Athletes /></Layout></PrivateRoute>} />
         <Route path="/athletes/:id" element={<PrivateRoute><Layout><AthleteDetail /></Layout></PrivateRoute>} />
         <Route path="/programs/:id" element={<PrivateRoute><Layout><ProgramDetail /></Layout></PrivateRoute>} />
+        <Route path="/programs/:id/edit" element={<PrivateRoute><Layout><ProgramEdit /></Layout></PrivateRoute>} />
+        <Route path="/templates" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
+        <Route path="/templates/new" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
+        <Route path="/templates/:id/edit" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
         <Route path="/programs/builder/:athleteId" element={<PrivateRoute><Layout><ProgramBuilder /></Layout></PrivateRoute>} />
         <Route path="/library" element={<PrivateRoute><Layout><Library /></Layout></PrivateRoute>} />
         <Route path="/pending-coaches" element={<PrivateRoute><Layout><PendingCoaches /></Layout></PrivateRoute>} />
