@@ -35,6 +35,7 @@ function daysSummary(template: any): string {
 }
 
 function TemplateList() {
+  const navigate = useNavigate()
   const [templates, setTemplates] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -121,7 +122,7 @@ function TemplateList() {
         <ApplyTemplateModal
           template={applyingTo}
           onClose={() => setApplyingTo(null)}
-          onApplied={(programId) => { window.location.href = `/programs/${programId}` }}
+          onApplied={(programId) => navigate(`/programs/${programId}`)}
         />
       )}
     </div>
