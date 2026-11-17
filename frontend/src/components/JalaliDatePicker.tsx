@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import * as jalaali from 'jalaali-js'
+import { toJalali } from '../utils/jalali'
 
 interface Props {
   value: string
@@ -27,12 +28,12 @@ export default function JalaliDatePicker({ value, onChange, label }: Props) {
         onClick={() => setShow(!show)}
         className="w-full px-3 py-2.5 border border-white/10 rounded-xl text-right min-h-[48px] bg-[#141716]"
       >
-        {value ? value : 'انتخاب تاریخ'}
+        {value ? toJalali(value) : 'انتخاب تاریخ'}
       </button>
       {show && (
-        <div className="mt-2 p-3 bg-white border rounded-xl shadow-lg">
-          <button type="button" onClick={setToday} className="w-full py-2 bg-primary-600 text-white rounded-xl mb-2">امروز</button>
-          <input type="date" value={value} onChange={(e) => { onChange(e.target.value); setShow(false) }} className="w-full p-2 border rounded-xl" />
+        <div className="mt-2 p-3 bg-white text-[#0A0A0A] rounded-xl shadow-lg">
+          <button type="button" onClick={setToday} className="w-full py-2 min-h-[48px] bg-primary-600 text-accent-text font-semibold rounded-xl mb-2">امروز</button>
+          <input type="date" value={value} onChange={(e) => { onChange(e.target.value); setShow(false) }} className="w-full p-2 min-h-[48px] border rounded-xl" />
         </div>
       )}
     </div>

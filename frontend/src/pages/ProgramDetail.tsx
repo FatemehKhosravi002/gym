@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import api from '../utils/api'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -45,6 +45,9 @@ export default function ProgramDetail() {
 
       <div className="flex flex-wrap gap-2">
         <Button onClick={downloadPDF} disabled={downloading}>{downloading ? 'در حال دانلود...' : 'دانلود PDF'}</Button>
+        <Link to={`/programs/${program.id}/edit`}>
+          <Button variant="secondary">ویرایش برنامه</Button>
+        </Link>
         <Button variant="secondary" onClick={() => {
           const url = `${window.location.origin}/public/program/${program.share_token}`
           navigator.clipboard.writeText(url)

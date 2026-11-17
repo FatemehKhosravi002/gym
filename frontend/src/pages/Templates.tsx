@@ -1,12 +1,493 @@
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import api from '../utils/api'
+import Button from '../components/Button'
 import Card from '../components/Card'
+import Input from '../components/Input'
+import ProgramStructureEditor, { type EditorDay, type EditorItem } from '../components/ProgramStructureEditor'
+import { apiErrorMessage } from '../utils/apiError'
+import { toJalali } from '../utils/jalali'
+import { toPersianDigits } from '../utils/persianDigits'
 
-export default function Templates() {
+type Notice = { kind: 'ok' | 'error'; text: string } | null
+
+function mapTemplateDays(rawDays: any[]): EditorDay[] {
+  return (rawDays || []).map((day: any) => ({
+    id: day.id,
+    day_index: day.day_index,
+    label: day.label || '',
+    items: (day.items || []).map((item: any) => ({
+      id: item.id,
+      exercise: item.exercise,
+      name: item.exercise_name || 'حرکت',
+      sets: item.sets,
+      reps: item.reps,
+      rest_seconds: item.rest_seconds,
+      note: item.note || '',
+    })),
+  }))
+}
+
+function daysSummary(template: any): string {
+  const days = template.days || []
+  const items = days.reduce((sum: number, d: any) => sum + (d.items?.length || 0), 0)
+  return `${toPersianDigits(days.length)} روز • ${toPersianDigits(items)} حرکت`
+}
+
+function TemplateList() {
+  const [templates, setTemplates] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState<Notice>(null)
+  const [applyingTo, setApplyingTo] = useState<any>(null)
+
+  const load = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await api.get('/program-templates/')
+      setTemplates(res.data.results || res.data)
+    } catch (e) {
+      setError(apiErrorMessage(e, 'خطا در دریافت قالب‌ها'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [])
+
+  const removeTemplate = async (template: any) => {
+    if (!window.confirm(`قالب «${template.name}» حذف شود؟`)) return
+    try {
+      await api.delete(`/program-templates/${template.id}/`)
+      setTemplates(list => list.filter(t => t.id !== template.id))
+      setNotice({ kind: 'ok', text: 'قالب حذف شد' })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'قالب حذف نشد') })
+    }
+  }
+
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-white">قالب‌ها</h2>
-      <Card>
-        <p className="text-[#d1d5db]">مدیریت قالب‌ها در حال توسعه است.</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="text-xl font-bold text-white">قالب‌های برنامه</h2>
+          <p className="text-sm text-text-secondary">یک برنامه را به‌عنوان قالب ذخیره کنید و برای ورزشکاران دیگر استفاده کنید.</p>
+        </div>
+        <Link to="/templates/new">
+          <Button>قالب جدید</Button>
+        </Link>
+      </div>
+
+      {notice && (
+        <Card>
+          <p className={notice.kind === 'error' ? 'text-white font-medium' : 'text-accent font-medium'}>{notice.text}</p>
+        </Card>
+      )}
+
+      {loading && <p className="text-text-secondary">در حال بارگذاری...</p>}
+      {!loading && error && <Card><p className="text-white">{error}</p></Card>}
+      {!loading && !error && templates.length === 0 && (
+        <Card>
+          <p className="text-white font-medium">هنوز قالبی نساخته‌اید.</p>
+          <p className="text-sm text-text-secondary mt-1">با «قالب جدید» اولین قالب را بسازید.</p>
+        </Card>
+      )}
+
+      <div className="space-y-2">
+        {templates.map(template => (
+          <Card key={template.id}>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="font-medium text-white">{template.name}</p>
+                <p className="text-sm text-text-secondary mt-1">{daysSummary(template)}</p>
+                <p className="text-sm text-text-secondary">
+                  ساخته‌شده در {toJalali(template.created_at)}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link to={`/templates/${template.id}/edit`}>
+                  <Button variant="secondary" size="sm">ویرایش</Button>
+                </Link>
+                <Button size="sm" onClick={() => setApplyingTo(template)}>استفاده برای ورزشکار</Button>
+                <Button variant="tertiary" size="sm" onClick={() => removeTemplate(template)}>حذف</Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {applyingTo && (
+        <ApplyTemplateModal
+          template={applyingTo}
+          onClose={() => setApplyingTo(null)}
+          onApplied={(programId) => { window.location.href = `/programs/${programId}` }}
+        />
+      )}
+    </div>
+  )
+}
+
+
+function ApplyTemplateModal({ template, onClose, onApplied }: { template: any; onClose: () => void; onApplied: (programId: number) => void }) {
+  const [query, setQuery] = useState('')
+  const [athletes, setAthletes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [applying, setApplying] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const res = query.trim()
+          ? await api.get('/athletes/search_combined/', { params: { q: query.trim() } })
+          : await api.get('/athletes/')
+        setAthletes(res.data.results || res.data)
+      } catch (e) {
+        setError(apiErrorMessage(e, 'خطا در دریافت ورزشکاران'))
+      } finally {
+        setLoading(false)
+      }
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  const applyTo = async (athlete: any) => {
+    setApplying(true)
+    setError('')
+    try {
+      const res = await api.post(`/program-templates/${template.id}/apply-to-athlete/`, { athlete_id: athlete.id })
+      onApplied(res.data.program_id)
+    } catch (e) {
+      setError(apiErrorMessage(e, 'قالب اعمال نشد'))
+      setApplying(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50">
+      <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <h3 className="font-semibold text-white">انتخاب ورزشکار</h3>
+          <button type="button" onClick={onClose} className="text-sm text-text-secondary hover:text-white min-h-[48px] px-2">
+            بستن
+          </button>
+        </div>
+        <p className="text-sm text-text-secondary mb-3">
+          از قالب «{template.name}» یک برنامه جدید ساخته می‌شود.
+        </p>
+        <Input placeholder="جستجوی نام یا کد ورزشکار..." value={query} onChange={(e) => setQuery(e.target.value)} />
+        {loading && <p className="text-sm text-text-secondary mt-3">در حال بارگذاری...</p>}
+        {!loading && error && <p className="text-sm text-white mt-3">{error}</p>}
+        {!loading && !error && athletes.length === 0 && (
+          <p className="text-sm text-text-secondary mt-3">ورزشکاری پیدا نشد.</p>
+        )}
+        <div className="space-y-2 mt-3">
+          {athletes.map((athlete: any) => (
+            <button
+              key={athlete.id}
+              type="button"
+              disabled={applying}
+              onClick={() => applyTo(athlete)}
+              className="w-full text-right p-3 bg-surface2 rounded-xl hover:bg-surface3 min-h-[48px] text-white border border-white/10 disabled:opacity-50"
+            >
+              <span className="font-medium">{athlete.first_name} {athlete.last_name}</span>
+              <span className="text-sm text-text-secondary"> • کد {toPersianDigits(athlete.unique_code)}</span>
+            </button>
+          ))}
+        </div>
       </Card>
     </div>
   )
+}
+
+function TemplateEditor({ id }: { id: string }) {
+  const navigate = useNavigate()
+  const [template, setTemplate] = useState<any>(null)
+  const [days, setDays] = useState<EditorDay[]>([])
+  const [form, setForm] = useState({ name: '', description: '' })
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [loadError, setLoadError] = useState('')
+  const [notice, setNotice] = useState<Notice>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get(`/program-templates/${id}/`)
+        setTemplate(res.data)
+        setDays(mapTemplateDays(res.data.days))
+        setForm({ name: res.data.name || '', description: res.data.description || '' })
+        setStatus('ready')
+      } catch (e) {
+        setLoadError(apiErrorMessage(e, 'قالب پیدا نشد'))
+        setStatus('error')
+      }
+    }
+    load()
+  }, [id])
+
+  const changed = !!template && (form.name !== template.name || form.description !== (template.description || ''))
+
+  const saveHeader = async () => {
+    if (!form.name.trim()) {
+      setNotice({ kind: 'error', text: 'نام قالب را وارد کنید' })
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await api.patch(`/program-templates/${id}/`, { name: form.name.trim(), description: form.description })
+      setTemplate((t: any) => ({ ...t, name: res.data.name, description: res.data.description }))
+      setForm({ name: res.data.name, description: res.data.description || '' })
+      setNotice({ kind: 'ok', text: 'تغییرات ذخیره شد' })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'ذخیره نشد') })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updateDayLabel = async (dayId: number, label: string) => {
+    try {
+      await api.patch(`/program-template-days/${dayId}/`, { label })
+      setDays(list => list.map(d => (d.id === dayId ? { ...d, label } : d)))
+      setNotice({ kind: 'ok', text: 'برچسب روز ذخیره شد' })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'برچسب ذخیره نشد') })
+    }
+  }
+
+  const addItem = async (dayId: number, exercise: { id: number; name: string }) => {
+    const day = days.find(d => d.id === dayId)
+    if (!day) return
+    try {
+      const res = await api.post('/program-template-items/', { template_day: dayId, exercise: exercise.id, order: day.items.length })
+      const created = res.data
+      const item: EditorItem = {
+        id: created.id,
+        exercise: exercise.id,
+        name: created.exercise_name || exercise.name,
+        sets: created.sets,
+        reps: created.reps,
+        rest_seconds: created.rest_seconds,
+        note: created.note || '',
+      }
+      setDays(list => list.map(d => (d.id === dayId ? { ...d, items: [...d.items, item] } : d)))
+      setNotice({ kind: 'ok', text: `«${item.name}» اضافه شد` })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'حرکت اضافه نشد') })
+    }
+  }
+
+  const updateItem = async (itemId: number, patch: Partial<EditorItem>) => {
+    try {
+      await api.patch(`/program-template-items/${itemId}/`, patch)
+      setDays(list => list.map(d => ({
+        ...d,
+        items: d.items.map(it => (it.id === itemId ? { ...it, ...patch } : it)),
+      })))
+      setNotice({ kind: 'ok', text: 'ذخیره شد' })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'ذخیره نشد') })
+    }
+  }
+
+  const deleteItem = async (itemId: number) => {
+    try {
+      await api.delete(`/program-template-items/${itemId}/`)
+      setDays(list => list.map(d => ({ ...d, items: d.items.filter(it => it.id !== itemId) })))
+      setNotice({ kind: 'ok', text: 'حرکت حذف شد' })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'حذف نشد') })
+    }
+  }
+
+  const addDay = async () => {
+    if (!template) return
+    const nextIndex = days.reduce((max, d) => Math.max(max, d.day_index), 0) + 1
+    if (nextIndex > 7) {
+      setNotice({ kind: 'error', text: 'حداکثر ۷ روز مجاز است' })
+      return
+    }
+    try {
+      const res = await api.post('/program-template-days/', { template: template.id, day_index: nextIndex, label: '' })
+      const count = days.length + 1
+      await api.patch(`/program-templates/${template.id}/`, { days_per_week: count })
+      setDays(list => [...list, { id: res.data.id, day_index: nextIndex, label: '', items: [] }])
+      setTemplate((t: any) => ({ ...t, days_per_week: count }))
+      setNotice({ kind: 'ok', text: `روز ${toPersianDigits(nextIndex)} اضافه شد` })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'روز اضافه نشد') })
+    }
+  }
+
+  const deleteDay = async (dayId: number) => {
+    if (!template) return
+    const day = days.find(d => d.id === dayId)
+    if (!day) return
+    if (!window.confirm(`روز ${toPersianDigits(day.day_index)} و همه حرکات آن حذف شود؟`)) return
+    try {
+      await api.delete(`/program-template-days/${dayId}/`)
+      const count = Math.max(days.length - 1, 0)
+      await api.patch(`/program-templates/${template.id}/`, { days_per_week: count })
+      setDays(list => list.filter(d => d.id !== dayId))
+      setTemplate((t: any) => ({ ...t, days_per_week: count }))
+      setNotice({ kind: 'ok', text: 'روز حذف شد' })
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'روز حذف نشد') })
+    }
+  }
+
+  if (status === 'loading') {
+    return <p className="text-text-secondary">در حال بارگذاری قالب...</p>
+  }
+
+  if (status === 'error' || !template) {
+    return (
+      <Card>
+        <p className="text-white">{loadError || 'قالب پیدا نشد'}</p>
+        <Button variant="secondary" className="mt-3" onClick={() => navigate('/templates')}>بازگشت به قالب‌ها</Button>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="text-xl font-bold text-white">ویرایش قالب</h2>
+          <p className="text-sm text-text-secondary">{toPersianDigits(days.length)} روز</p>
+        </div>
+        <Link to="/templates" className="min-h-[48px] flex items-center text-sm text-white hover:text-accent">
+          بازگشت به قالب‌ها
+        </Link>
+      </div>
+
+      {notice && (
+        <Card>
+          <p className={notice.kind === 'error' ? 'text-white font-medium' : 'text-accent font-medium'}>{notice.text}</p>
+        </Card>
+      )}
+
+      <Card>
+        <div className="space-y-3">
+          <Input label="نام قالب" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <div>
+            <label className="block text-sm text-text-secondary mb-2" htmlFor="template-description">توضیح (اختیاری)</label>
+            <textarea
+              id="template-description"
+              className="w-full min-h-[96px] bg-surface2 border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-text-secondary focus:outline-none focus:border-accent/50"
+              placeholder="مثال: برنامه حجم، سطح متوسط"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+          <Button onClick={saveHeader} disabled={!changed || saving} className="w-full">
+            {saving ? 'در حال ذخیره...' : 'ذخیره تغییرات'}
+          </Button>
+        </div>
+      </Card>
+
+      <h3 className="font-semibold text-white pt-2">روزها و حرکات</h3>
+      <ProgramStructureEditor
+        days={days}
+        onUpdateDayLabel={updateDayLabel}
+        onAddItem={addItem}
+        onUpdateItem={updateItem}
+        onDeleteItem={deleteItem}
+        onAddDay={addDay}
+        onDeleteDay={deleteDay}
+      />
+    </div>
+  )
+}
+
+function TemplateCreate() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({ name: '', description: '' })
+  const [daysPerWeek, setDaysPerWeek] = useState(3)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim()) {
+      setError('نام قالب را وارد کنید')
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      const res = await api.post('/program-templates/', {
+        name: form.name.trim(),
+        description: form.description,
+        days_per_week: daysPerWeek,
+      })
+      const templateId = res.data.id
+      for (let i = 1; i <= daysPerWeek; i++) {
+        await api.post('/program-template-days/', { template: templateId, day_index: i, label: '' })
+      }
+      navigate(`/templates/${templateId}/edit`)
+    } catch (err) {
+      setError(apiErrorMessage(err, 'قالب ساخته نشد'))
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h2 className="text-xl font-bold text-white">قالب جدید</h2>
+        <Link to="/templates" className="min-h-[48px] flex items-center text-sm text-white hover:text-accent">
+          بازگشت به قالب‌ها
+        </Link>
+      </div>
+
+      {error && <Card><p className="text-white font-medium">{error}</p></Card>}
+
+      <Card>
+        <form onSubmit={submit} className="space-y-4">
+          <Input label="نام قالب" placeholder="مثال: برنامه حجم ۳ روزه" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <div>
+            <p className="text-sm text-text-secondary mb-2">تعداد روز در هفته</p>
+            <div className="grid grid-cols-4 gap-2">
+              {[1, 2, 3, 4, 5, 6, 7].map(n => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setDaysPerWeek(n)}
+                  className={`min-h-[48px] rounded-xl font-semibold border-2 ${daysPerWeek === n ? 'bg-accent text-accent-text border-accent' : 'bg-surface2 text-white border-white/10'}`}
+                >
+                  {toPersianDigits(n)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-text-secondary mb-2" htmlFor="new-template-description">توضیح (اختیاری)</label>
+            <textarea
+              id="new-template-description"
+              className="w-full min-h-[96px] bg-surface2 border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-text-secondary focus:outline-none focus:border-accent/50"
+              placeholder="مثال: برنامه حجم، سطح متوسط"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+          <Button type="submit" disabled={saving} className="w-full">
+            {saving ? 'در حال ساخت...' : 'ساخت قالب و افزودن حرکات'}
+          </Button>
+        </form>
+      </Card>
+    </div>
+  )
+}
+
+export default function Templates() {
+  const { id } = useParams()
+  const { pathname } = useLocation()
+  if (pathname === '/templates/new') return <TemplateCreate />
+  if (id) return <TemplateEditor id={id} />
+  return <TemplateList />
 }

@@ -9,6 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const nav = [
     { path: '/athletes', label: 'ورزشکاران' },
     { path: '/library', label: 'کتابخانه حرکات' },
+    { path: '/templates', label: 'قالب‌های برنامه' },
   ]
   if (user?.is_superuser || user?.role === 'admin') {
     nav.push({ path: '/pending-coaches', label: 'تأیید مربی‌ها' })
