@@ -140,9 +140,13 @@ class ResetCoachPasswordView(APIView):
         return Response({'temp_password': temp})
 
 
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .custom_auth import CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .custom_auth import CustomTokenObtainPairSerializer, ActiveUserTokenRefreshSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+
+class ActiveTokenRefreshView(TokenRefreshView):
+    serializer_class = ActiveUserTokenRefreshSerializer

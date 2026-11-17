@@ -11,5 +11,6 @@ class AuthTest2(TestCase):
 
     def test_unapproved_cannot_login2(self):
         User.objects.create_user('bob', 'b@b.com', 'ComplexPass123!', role='coach', is_approved=False)
-        res = self.client.post('/api/token/', {'username': 'bob', 'password': 'ComplexPass123!'})
-        self.assertNotEqual(res.status_code, 200)
+        res = self.client.post('/api/users/token/', {'username': 'bob', 'password': 'ComplexPass123!'})
+        self.assertEqual(res.status_code, 401)
+

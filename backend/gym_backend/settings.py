@@ -142,28 +142,37 @@ SIMPLE_JWT['TOKEN_OBTAIN_SERIALIZER'] = 'gym_backend.custom_auth.CustomTokenObta
 AUTHENTICATION_BACKENDS = ['gym_backend.auth_backends.ActiveUserBackend']
 
 
-# --- Production behind nginx (HTTPS) ---
-import os as _os
+# --- Deployment / proxy settings (env-driven, safe defaults) ---
 
-def _csv(name, default=""):
-    return [x.strip() for x in _os.environ.get(name, default).split(",") if x.strip()]
 
-if _os.environ.get("CSRF_TRUSTED_ORIGINS"):
-    CSRF_TRUSTED_ORIGINS = _csv("CSRF_TRUSTED_ORIGINS")
-if _os.environ.get("SECURE_PROXY_SSL_HEADER"):
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+def _env_bool(name, default=False):
+    """Boolean env flag; unset OR empty means "use the default"."""
+    raw = os.environ.get(name)
+    if raw is None or raw == '':
+        return bool(default)
+    return raw.strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def _csv(name, default=''):
+    """Comma separated env list; unset OR empty means "use the default"."""
+    raw = os.environ.get(name) or default
+    return [x.strip() for x in raw.split(',') if x.strip()]
+
+
+# Needed for the Django admin and any session/CSRF form behind nginx HTTPS.
+CSRF_TRUSTED_ORIGINS = _csv(
+    'CSRF_TRUSTED_ORIGINS',
+    '' if DEBUG else 'https://physiquegym.ir,https://www.physiquegym.ir',
+)
+if _env_bool('SECURE_PROXY_SSL_HEADER', not DEBUG):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-SESSION_COOKIE_SECURE = _os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
-CSRF_COOKIE_SECURE = _os.environ.get("CSRF_COOKIE_SECURE", "False") == "True"
-SECURE_SSL_REDIRECT = _os.environ.get("SECURE_SSL_REDIRECT", "False") == "True"
+SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', False)
+# Secure cookies only when the request is really HTTPS; in DEBUG/local HTTP a
+# secure-only session/CSRF cookie makes /admin/ login return 403.
+SESSION_COOKIE_SECURE = _env_bool('SESSION_COOKIE_SECURE', not DEBUG)
+CSRF_COOKIE_SECURE = _env_bool('CSRF_COOKIE_SECURE', not DEBUG)
+SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
+CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE
 
-
-# Ensure admin works behind HTTPS proxy
-CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS if 'CSRF_TRUSTED_ORIGINS' in locals() else []
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-USE_X_FORWARDED_HOST = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SAMESITE = 'Lax'
 
