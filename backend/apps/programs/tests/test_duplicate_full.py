@@ -24,6 +24,8 @@ class DuplicateFullTest(TestCase):
 
     def test_duplicate_returns_most_recent(self):
         p2 = Program.objects.create(athlete=self.athlete, coach=self.user, sequence_number=2, title='آبان', start_date=date(2025,10,23), days_per_week=3)
+        d2 = ProgramDay.objects.create(program=p2, day_index=1)
+        ProgramItem.objects.create(program_day=d2, exercise=self.ex, order=0)
         res = self.client.get(f'/api/programs/duplicate_check/?athlete_id={self.athlete.id}&exercise_id={self.ex.id}')
         self.assertTrue(res.data.get('duplicate') or res.data.get('used'))
         self.assertEqual(res.data.get('sequence_number'), 2)
