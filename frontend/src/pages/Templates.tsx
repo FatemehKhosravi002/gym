@@ -72,8 +72,8 @@ function TemplateList() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-xl font-bold text-white">قالب‌های برنامه</h2>
-          <p className="text-sm text-text-secondary">یک برنامه را به‌عنوان قالب ذخیره کنید و برای ورزشکاران دیگر استفاده کنید.</p>
+          <h2 className="text-xl font-bold text-primary-900">قالب‌های برنامه</h2>
+          <p className="text-sm text-ink-600">یک برنامه را به‌عنوان قالب ذخیره کنید و برای ورزشکاران دیگر استفاده کنید.</p>
         </div>
         <Link to="/templates/new">
           <Button>قالب جدید</Button>
@@ -82,16 +82,16 @@ function TemplateList() {
 
       {notice && (
         <Card>
-          <p className={notice.kind === 'error' ? 'text-white font-medium' : 'text-accent font-medium'}>{notice.text}</p>
+          <p className={notice.kind === 'error' ? 'text-ink-900 font-medium' : 'text-accent-700 font-medium'}>{notice.text}</p>
         </Card>
       )}
 
-      {loading && <p className="text-text-secondary">در حال بارگذاری...</p>}
-      {!loading && error && <Card><p className="text-white">{error}</p></Card>}
+      {loading && <p className="text-ink-600">در حال بارگذاری...</p>}
+      {!loading && error && <Card><p className="text-ink-900">{error}</p></Card>}
       {!loading && !error && templates.length === 0 && (
         <Card>
-          <p className="text-white font-medium">هنوز قالبی نساخته‌اید.</p>
-          <p className="text-sm text-text-secondary mt-1">با «قالب جدید» اولین قالب را بسازید.</p>
+          <p className="text-ink-900 font-medium">هنوز قالبی نساخته‌اید.</p>
+          <p className="text-sm text-ink-600 mt-1">با «قالب جدید» اولین قالب را بسازید.</p>
         </Card>
       )}
 
@@ -100,9 +100,9 @@ function TemplateList() {
           <Card key={template.id}>
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="font-medium text-white">{template.name}</p>
-                <p className="text-sm text-text-secondary mt-1">{daysSummary(template)}</p>
-                <p className="text-sm text-text-secondary">
+                <p className="font-medium text-ink-900">{template.name}</p>
+                <p className="text-sm text-ink-600 mt-1">{daysSummary(template)}</p>
+                <p className="text-sm text-ink-600">
                   ساخته‌شده در {toJalali(template.created_at)}
                 </p>
               </div>
@@ -168,22 +168,22 @@ function ApplyTemplateModal({ template, onClose, onApplied }: { template: any; o
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50">
+    <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50">
       <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-semibold text-white">انتخاب ورزشکار</h3>
-          <button type="button" onClick={onClose} className="text-sm text-text-secondary hover:text-white min-h-[48px] px-2">
+          <h3 className="font-semibold text-primary-900">انتخاب ورزشکار</h3>
+          <button type="button" onClick={onClose} className="text-sm text-ink-600 hover:text-ink-900 min-h-[48px] px-2">
             بستن
           </button>
         </div>
-        <p className="text-sm text-text-secondary mb-3">
+        <p className="text-sm text-ink-600 mb-3">
           از قالب «{template.name}» یک برنامه جدید ساخته می‌شود.
         </p>
         <Input placeholder="جستجوی نام یا کد ورزشکار..." value={query} onChange={(e) => setQuery(e.target.value)} />
-        {loading && <p className="text-sm text-text-secondary mt-3">در حال بارگذاری...</p>}
-        {!loading && error && <p className="text-sm text-white mt-3">{error}</p>}
+        {loading && <p className="text-sm text-ink-600 mt-3">در حال بارگذاری...</p>}
+        {!loading && error && <p className="text-sm text-ink-900 mt-3">{error}</p>}
         {!loading && !error && athletes.length === 0 && (
-          <p className="text-sm text-text-secondary mt-3">ورزشکاری پیدا نشد.</p>
+          <p className="text-sm text-ink-600 mt-3">ورزشکاری پیدا نشد.</p>
         )}
         <div className="space-y-2 mt-3">
           {athletes.map((athlete: any) => (
@@ -192,10 +192,10 @@ function ApplyTemplateModal({ template, onClose, onApplied }: { template: any; o
               type="button"
               disabled={applying}
               onClick={() => applyTo(athlete)}
-              className="w-full text-right p-3 bg-surface2 rounded-xl hover:bg-surface3 min-h-[48px] text-white border border-white/10 disabled:opacity-50"
+              className="w-full text-right p-3 bg-surface-2 rounded-xl hover:bg-surface-3 min-h-[48px] text-ink-900 border border-border disabled:opacity-50"
             >
               <span className="font-medium">{athlete.first_name} {athlete.last_name}</span>
-              <span className="text-sm text-text-secondary"> • کد {toPersianDigits(athlete.unique_code)}</span>
+              <span className="text-sm text-ink-600"> • کد {toPersianDigits(athlete.unique_code)}</span>
             </button>
           ))}
         </div>
@@ -342,13 +342,13 @@ function TemplateEditor({ id }: { id: string }) {
   }
 
   if (status === 'loading') {
-    return <p className="text-text-secondary">در حال بارگذاری قالب...</p>
+    return <p className="text-ink-600">در حال بارگذاری قالب...</p>
   }
 
   if (status === 'error' || !template) {
     return (
       <Card>
-        <p className="text-white">{loadError || 'قالب پیدا نشد'}</p>
+        <p className="text-ink-900">{loadError || 'قالب پیدا نشد'}</p>
         <Button variant="secondary" className="mt-3" onClick={() => navigate('/templates')}>بازگشت به قالب‌ها</Button>
       </Card>
     )
@@ -358,17 +358,17 @@ function TemplateEditor({ id }: { id: string }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-xl font-bold text-white">ویرایش قالب</h2>
-          <p className="text-sm text-text-secondary">{toPersianDigits(days.length)} روز</p>
+          <h2 className="text-xl font-bold text-primary-900">ویرایش قالب</h2>
+          <p className="text-sm text-ink-600">{toPersianDigits(days.length)} روز</p>
         </div>
-        <Link to="/templates" className="min-h-[48px] flex items-center text-sm text-white hover:text-accent">
+        <Link to="/templates" className="min-h-[48px] flex items-center text-sm text-ink-900 hover:text-accent-700">
           بازگشت به قالب‌ها
         </Link>
       </div>
 
       {notice && (
         <Card>
-          <p className={notice.kind === 'error' ? 'text-white font-medium' : 'text-accent font-medium'}>{notice.text}</p>
+          <p className={notice.kind === 'error' ? 'text-ink-900 font-medium' : 'text-accent-700 font-medium'}>{notice.text}</p>
         </Card>
       )}
 
@@ -376,10 +376,10 @@ function TemplateEditor({ id }: { id: string }) {
         <div className="space-y-3">
           <Input label="نام قالب" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <div>
-            <label className="block text-sm text-text-secondary mb-2" htmlFor="template-description">توضیح (اختیاری)</label>
+            <label className="block text-sm text-ink-600 mb-2" htmlFor="template-description">توضیح (اختیاری)</label>
             <textarea
               id="template-description"
-              className="w-full min-h-[96px] bg-surface2 border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-text-secondary focus:outline-none focus:border-accent/50"
+              className="w-full min-h-[96px] bg-surface-2 border border-border rounded-[16px] px-4 py-3 text-ink-900 placeholder-text-secondary focus:outline-none focus:border-accent-500/50"
               placeholder="مثال: برنامه حجم، سطح متوسط"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -391,7 +391,7 @@ function TemplateEditor({ id }: { id: string }) {
         </div>
       </Card>
 
-      <h3 className="font-semibold text-white pt-2">روزها و حرکات</h3>
+      <h3 className="font-semibold text-primary-900 pt-2">روزها و حرکات</h3>
       <ProgramStructureEditor
         days={days}
         onUpdateDayLabel={updateDayLabel}
@@ -440,26 +440,26 @@ function TemplateCreate() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <h2 className="text-xl font-bold text-white">قالب جدید</h2>
-        <Link to="/templates" className="min-h-[48px] flex items-center text-sm text-white hover:text-accent">
+        <h2 className="text-xl font-bold text-primary-900">قالب جدید</h2>
+        <Link to="/templates" className="min-h-[48px] flex items-center text-sm text-ink-900 hover:text-accent-700">
           بازگشت به قالب‌ها
         </Link>
       </div>
 
-      {error && <Card><p className="text-white font-medium">{error}</p></Card>}
+      {error && <Card><p className="text-ink-900 font-medium">{error}</p></Card>}
 
       <Card>
         <form onSubmit={submit} className="space-y-4">
           <Input label="نام قالب" placeholder="مثال: برنامه حجم ۳ روزه" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <div>
-            <p className="text-sm text-text-secondary mb-2">تعداد روز در هفته</p>
+            <p className="text-sm text-ink-600 mb-2">تعداد روز در هفته</p>
             <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4, 5, 6, 7].map(n => (
                 <button
                   key={n}
                   type="button"
                   onClick={() => setDaysPerWeek(n)}
-                  className={`min-h-[48px] rounded-xl font-semibold border-2 ${daysPerWeek === n ? 'bg-accent text-accent-text border-accent' : 'bg-surface2 text-white border-white/10'}`}
+                  className={`min-h-[48px] rounded-xl font-semibold border-2 ${daysPerWeek === n ? 'bg-accent-500 text-ink-900 border-accent-500' : 'bg-surface-2 text-ink-900 border-border'}`}
                 >
                   {toPersianDigits(n)}
                 </button>
@@ -467,10 +467,10 @@ function TemplateCreate() {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-text-secondary mb-2" htmlFor="new-template-description">توضیح (اختیاری)</label>
+            <label className="block text-sm text-ink-600 mb-2" htmlFor="new-template-description">توضیح (اختیاری)</label>
             <textarea
               id="new-template-description"
-              className="w-full min-h-[96px] bg-surface2 border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-text-secondary focus:outline-none focus:border-accent/50"
+              className="w-full min-h-[96px] bg-surface-2 border border-border rounded-[16px] px-4 py-3 text-ink-900 placeholder-text-secondary focus:outline-none focus:border-accent-500/50"
               placeholder="مثال: برنامه حجم، سطح متوسط"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}

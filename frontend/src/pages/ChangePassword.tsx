@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../utils/api'
+import { getFieldErrors } from '../utils/apiError'
 import Button from '../components/Button'
 import PasswordInput from '../components/PasswordInput'
 import Card from '../components/Card'
+import { CheckIcon, AlertIcon } from '../components/icons'
 
 export default function ChangePassword() {
   const [form, setForm] = useState({ current_password: '', new_password: '', confirm_password: '' })
-  const [error, setError] = useState<any>({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [general, setGeneral] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const navigate = useNavigate()
@@ -15,66 +18,78 @@ export default function ChangePassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError({})
+    setErrors({})
+    setGeneral('')
     try {
       await api.post('/users/change-password/', form)
       setSuccess(true)
       setTimeout(() => navigate('/athletes'), 1500)
-    } catch (err: any) {
-      if (err.response?.data) {
-        setError(err.response.data)
-      } else {
-        setError({ general: 'خطا در تغییر رمز عبور' })
-      }
+    } catch (err) {
+      const fieldErrors = getFieldErrors(err)
+      setErrors(fieldErrors)
+      if (!Object.keys(fieldErrors).length) setGeneral('تغییر رمز عبور انجام نشد. دوباره تلاش کنید.')
     } finally {
       setLoading(false)
     }
   }
 
+
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0F1110] flex items-center justify-center px-4" dir="rtl">
-        <Card className="w-full max-w-md text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="mx-auto max-w-md py-10">
+        <Card className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+            <CheckIcon className="h-8 w-8" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">رمز عبور تغییر یافت</h2>
-          <p className="text-[#d1d5db]">در حال انتقال...</p>
+          <h1 className="mb-2 text-xl font-bold text-primary-900">رمز عبور تغییر کرد</h1>
+          <p className="text-sm text-ink-600">در حال انتقال به فهرست ورزشکاران…</p>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1110] flex items-center justify-center px-4" dir="rtl">
-      <Card className="w-full max-w-md">
-        <h1 className="text-xl font-bold text-white mb-6">تغییر رمز عبور</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="mx-auto max-w-md space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold text-primary-900">تغییر رمز عبور</h1>
+        <p className="mt-1 text-sm text-ink-600">برای امنیت حساب، رمز فعلی را وارد کنید.</p>
+      </div>
+
+      {general && (
+        <div role="alert" className="flex items-start gap-2 rounded-field border border-error-200 bg-error-50 p-3 text-sm text-error-700">
+          <AlertIcon className="mt-0.5 h-5 w-5 shrink-0" />
+          <span>{general}</span>
+        </div>
+      )}
+
+      <Card>
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <PasswordInput
             label="رمز عبور فعلی"
             value={form.current_password}
-            onChange={(e) => setForm({...form, current_password: e.target.value})}
+            onChange={(e) => setForm({ ...form, current_password: e.target.value })}
+            error={errors.current_password}
+            autoComplete="current-password"
             required
           />
-          {error.current_password && <p className="text-sm text-red-600">{error.current_password}</p>}
           <PasswordInput
             label="رمز عبور جدید"
             value={form.new_password}
-            onChange={(e) => setForm({...form, new_password: e.target.value})}
+            onChange={(e) => setForm({ ...form, new_password: e.target.value })}
+            error={errors.new_password}
+            hint="حداقل ۸ کاراکتر و شامل حروف و اعداد."
+            autoComplete="new-password"
             required
           />
-          {error.new_password && <p className="text-sm text-red-600">{error.new_password}</p>}
           <PasswordInput
             label="تکرار رمز عبور جدید"
             value={form.confirm_password}
-            onChange={(e) => setForm({...form, confirm_password: e.target.value})}
+            onChange={(e) => setForm({ ...form, confirm_password: e.target.value })}
+            error={errors.confirm_password}
+            autoComplete="new-password"
             required
           />
-          {error.confirm_password && <p className="text-sm text-red-600">{error.confirm_password}</p>}
-          {error.general && <p className="text-sm text-red-600">{error.general}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" size="lg" fullWidth loading={loading}>
             {loading ? 'در حال تغییر...' : 'تغییر رمز عبور'}
           </Button>
         </form>
@@ -82,3 +97,4 @@ export default function ChangePassword() {
     </div>
   )
 }
+

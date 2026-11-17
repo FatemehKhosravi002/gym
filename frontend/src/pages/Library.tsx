@@ -149,7 +149,7 @@ export default function Library() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">کتابخانه حرکات</h2>
+        <h2 className="text-xl font-bold text-primary-900">کتابخانه حرکات</h2>
         <Button onClick={() => setShowNewEx(true)}>افزودن حرکت جدید</Button>
       </div>
 
@@ -161,28 +161,28 @@ export default function Library() {
       </Card>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[#e5e7eb]">دسته‌بندی‌ها</p>
-        <label className="flex items-center gap-2 text-sm text-[#e5e7eb]">
+        <p className="text-sm text-ink-600">دسته‌بندی‌ها</p>
+        <label className="flex items-center gap-2 text-sm text-ink-600">
           <input type="checkbox" checked={showInactiveCats} onChange={(e) => setShowInactiveCats(e.target.checked)} />
           نمایش غیرفعال‌ها
         </label>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => setSelectedCat(null)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === null ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] border border-white/10 text-white'}`}>همه</button>
+        <button onClick={() => setSelectedCat(null)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === null ? 'bg-primary-700 text-white' : 'bg-surface-2 border border-border text-ink-900'}`}>همه</button>
         {categories.map(cat => (
           <div key={cat.id} className="flex items-center gap-1">
-            <button onClick={() => setSelectedCat(cat.id)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === cat.id ? 'bg-primary-600 text-white' : 'bg-[#1B1F1D] border border-white/10 text-white'} ${cat.is_active === false ? 'opacity-60' : ''}`}>
+            <button onClick={() => setSelectedCat(cat.id)} className={`px-4 py-2 rounded-xl min-h-[44px] ${selectedCat === cat.id ? 'bg-primary-700 text-white' : 'bg-surface-2 border border-border text-ink-900'} ${cat.is_active === false ? 'opacity-60' : ''}`}>
               {cat.name} ({cat.exercise_count || 0})
             </button>
-            <button onClick={() => setMenuCat(cat)} className="px-2 py-2 text-[#e5e7eb] min-h-[44px]">⋯</button>
+            <button onClick={() => setMenuCat(cat)} className="px-2 py-2 text-ink-600 min-h-[44px]">⋯</button>
           </div>
         ))}
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-[#e5e7eb]">حرکات</p>
-        <label className="flex items-center gap-2 text-sm text-[#e5e7eb]">
+        <p className="text-sm text-ink-600">حرکات</p>
+        <label className="flex items-center gap-2 text-sm text-ink-600">
           <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} />
           نمایش غیرفعال‌ها
         </label>
@@ -193,8 +193,8 @@ export default function Library() {
           <Card key={ex.id} className={!ex.is_active ? 'opacity-60' : ''}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-white">{ex.name}</p>
-                <p className="text-sm text-[#d1d5db]">{ex.category_name} | استفاده: {ex.usage_count || 0}</p>
+                <p className="font-medium text-ink-900">{ex.name}</p>
+                <p className="text-sm text-ink-600">{ex.category_name} | استفاده: {ex.usage_count || 0}</p>
               </div>
               <div className="flex gap-2">
                 {ex.is_active ? <Button variant="secondary" size="sm" onClick={() => archiveExercise(ex.id)}>حذف</Button> : <Button size="sm" onClick={() => restoreExercise(ex.id)}>بازیابی</Button>}
@@ -205,13 +205,13 @@ export default function Library() {
       </div>
 
       {menuCat && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4">
-            <h3 className="font-semibold mb-4 text-white">{menuCat.name}</h3>
+            <h3 className="font-semibold mb-4 text-primary-900">{menuCat.name}</h3>
             <div className="space-y-2">
               <Button variant="secondary" className="w-full" onClick={() => { setEditingCat(menuCat); setMenuCat(null); }}>تغییر نام</Button>
               {menuCat.is_active !== false ? <Button variant="secondary" className="w-full" onClick={() => deactivateCategory(menuCat.id)}>غیرفعال کردن</Button> : <Button variant="secondary" className="w-full" onClick={() => activateCategory(menuCat.id)}>فعال کردن</Button>}
-              <Button variant="secondary" className="w-full text-red-600" onClick={() => { setDeleteCat(menuCat); setMenuCat(null); }}>حذف</Button>
+              <Button variant="secondary" className="w-full text-error-700" onClick={() => { setDeleteCat(menuCat); setMenuCat(null); }}>حذف</Button>
               <Button variant="tertiary" className="w-full" onClick={() => setMenuCat(null)}>انصراف</Button>
             </div>
           </Card>
@@ -219,9 +219,9 @@ export default function Library() {
       )}
 
       {editingCat && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4">
-            <h3 className="font-semibold mb-4 text-white">تغییر نام دسته‌بندی</h3>
+            <h3 className="font-semibold mb-4 text-primary-900">تغییر نام دسته‌بندی</h3>
             <Input value={editingCat.name} onChange={(e) => setEditingCat({...editingCat, name: e.target.value})} />
             <div className="flex gap-2 mt-4">
               <Button onClick={renameCategory} className="flex-1">ذخیره</Button>
@@ -232,13 +232,13 @@ export default function Library() {
       )}
 
       {deleteCat && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4">
             {deleteCat.hasExercises ? (
               <>
-                <h3 className="font-semibold mb-4 text-white">این دسته {deleteCat.exercise_count} حرکت دارد</h3>
-                <p className="text-sm text-[#e5e7eb] mb-3">حرکات را به دسته دیگری منتقل کنید و سپس دسته حذف می‌شود</p>
-                <select value={moveTo} onChange={(e) => setMoveTo(e.target.value)} className="w-full px-3 py-2 border border-white/10 rounded-xl mb-4 min-h-[44px] text-white bg-[#141716]">
+                <h3 className="font-semibold mb-4 text-primary-900">این دسته {deleteCat.exercise_count} حرکت دارد</h3>
+                <p className="text-sm text-ink-600 mb-3">حرکات را به دسته دیگری منتقل کنید و سپس دسته حذف می‌شود</p>
+                <select value={moveTo} onChange={(e) => setMoveTo(e.target.value)} className="w-full px-3 py-2 border border-border rounded-xl mb-4 min-h-[44px] text-ink-900 bg-surface">
                   <option value="">انتخاب دسته‌بندی مقصد</option>
                   {categories.filter(c => c.id !== deleteCat.id).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
@@ -249,8 +249,8 @@ export default function Library() {
               </>
             ) : (
               <>
-                <h3 className="font-semibold mb-4 text-white">حذف دسته‌بندی</h3>
-                <p className="text-[#e5e7eb] mb-4">آیا از حذف این دسته‌بندی اطمینان دارید؟</p>
+                <h3 className="font-semibold mb-4 text-primary-900">حذف دسته‌بندی</h3>
+                <p className="text-ink-600 mb-4">آیا از حذف این دسته‌بندی اطمینان دارید؟</p>
                 <div className="flex gap-2">
                   <Button onClick={deleteCategory} className="flex-1">حذف</Button>
                   <Button variant="secondary" onClick={() => setDeleteCat(null)} className="flex-1">انصراف</Button>
@@ -262,19 +262,19 @@ export default function Library() {
       )}
 
       {showNewEx && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="font-semibold mb-4 text-white">افزودن حرکت جدید</h3>
+            <h3 className="font-semibold mb-4 text-primary-900">افزودن حرکت جدید</h3>
             <form onSubmit={createExercise} className="space-y-3">
               <Input label="نام حرکت" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} required />
-              {errors.name && <p className="text-sm text-red-600">{Array.isArray(errors.name) ? errors.name[0] : errors.name}</p>}
-              <select className="w-full px-3 py-2 border border-white/10 rounded-xl min-h-[44px] text-white bg-[#141716]" value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} required>
+              {errors.name && <p className="text-sm text-error-700">{Array.isArray(errors.name) ? errors.name[0] : errors.name}</p>}
+              <select className="w-full px-3 py-2 border border-border rounded-xl min-h-[44px] text-ink-900 bg-surface" value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} required>
                 <option value="">انتخاب دسته‌بندی</option>
                 {categories.filter((c:any)=>c.is_active!==false).map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
               </select>
-              {errors.category && <p className="text-sm text-red-600">{Array.isArray(errors.category) ? errors.category[0] : errors.category}</p>}
+              {errors.category && <p className="text-sm text-error-700">{Array.isArray(errors.category) ? errors.category[0] : errors.category}</p>}
               <Input label="لینک ویدیو (اختیاری)" value={form.video_url} onChange={(e) => setForm({...form, video_url: e.target.value})} />
-              <textarea className="w-full px-3 py-2 border border-white/10 rounded-xl min-h-[80px] text-white" placeholder="توضیحات (اختیاری)" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
+              <textarea className="w-full px-3 py-2 border border-border rounded-xl min-h-[80px] text-ink-900" placeholder="توضیحات (اختیاری)" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">ذخیره</Button>
                 <Button type="button" variant="secondary" onClick={() => setShowNewEx(false)} className="flex-1">انصراف</Button>
@@ -285,7 +285,7 @@ export default function Library() {
       )}
 
       {toast && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-xl">{toast}</div>
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-surface-2 text-ink-900 px-4 py-2 rounded-xl">{toast}</div>
       )}
     </div>
   )

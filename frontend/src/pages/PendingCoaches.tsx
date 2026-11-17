@@ -52,13 +52,13 @@ export default function PendingCoaches() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">تأیید مربی‌ها</h2>
-        <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">{coaches.length} در انتظار</span>
+        <h2 className="text-xl font-bold text-primary-900">تأیید مربی‌ها</h2>
+        <span className="bg-warning-100 text-warning-700 px-3 py-1 rounded-full text-sm">{coaches.length} در انتظار</span>
       </div>
 
       {coaches.length === 0 && (
         <Card className="text-center py-8">
-          <p className="text-[#d1d5db]">مربی در انتظار تأییدی وجود ندارد</p>
+          <p className="text-ink-600">مربی در انتظار تأییدی وجود ندارد</p>
         </Card>
       )}
 
@@ -67,13 +67,13 @@ export default function PendingCoaches() {
           <Card key={c.id}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="font-medium text-white">{c.first_name} {c.last_name}</p>
-                <p className="text-sm text-[#9CA3AF]">نام کاربری: {c.username} {c.phone && `| تلفن: ${c.phone}`}</p>
+                <p className="font-medium text-ink-900">{c.first_name} {c.last_name}</p>
+                <p className="text-sm text-ink-500">نام کاربری: {c.username} {c.phone && `| تلفن: ${c.phone}`}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button onClick={() => approve(c.id)} size="sm">تأیید</Button>
                 <Button variant="secondary" onClick={() => resetPass(c.id)} size="sm">بازنشانی رمز</Button>
-                <Button variant="tertiary" onClick={() => reject(c.id)} size="sm" className="text-red-600">رد</Button>
+                <Button variant="tertiary" onClick={() => reject(c.id)} size="sm" className="text-error-700">رد</Button>
               </div>
             </div>
           </Card>
@@ -81,11 +81,11 @@ export default function PendingCoaches() {
       </div>
 
       {tempPass.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-center justify-center z-50 px-4">
           <Card className="w-full max-w-md">
-            <h3 className="font-bold text-white mb-4">رمز موقت تولید شد</h3>
-            <p className="text-sm text-red-600 mb-3">این رمز فقط یک‌بار نمایش داده می‌شود. حتماً آن را کپی کنید.</p>
-            <div className="bg-[#1B1F1D] p-3 rounded-xl font-mono text-center text-lg mb-4 select-all">
+            <h3 className="font-bold text-primary-900 mb-4">رمز موقت تولید شد</h3>
+            <p className="text-sm text-error-700 mb-3">این رمز فقط یک‌بار نمایش داده می‌شود. حتماً آن را کپی کنید.</p>
+            <div className="bg-surface-2 p-3 rounded-xl font-mono text-center text-lg mb-4 select-all">
               {tempPass.pass}
             </div>
             <div className="flex gap-2">

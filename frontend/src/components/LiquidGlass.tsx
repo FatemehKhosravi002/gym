@@ -11,11 +11,12 @@ export default function LiquidGlass({ children, className = '', blur = true }: L
     <div 
       className={`relative ${className}`}
       style={{
-        background: 'rgba(255, 255, 255, 0.05)',
+        background: 'var(--color-surface)',
         backdropFilter: blur ? 'blur(10px)' : 'none',
         WebkitBackdropFilter: blur ? 'blur(10px)' : 'none',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: '1px solid var(--color-border)',
         borderRadius: '24px',
+        boxShadow: 'var(--shadow-soft)',
       }}
     >
       {children}

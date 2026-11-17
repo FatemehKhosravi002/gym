@@ -1,17 +1,37 @@
-import React from 'react'
+import React, { useId } from 'react'
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string
+  hint?: string
+  error?: string
+  size?: 'md' | 'lg'
 }
 
-export default function Input({ label, className = '', ...props }: InputProps) {
+export default function Input({ label, hint, error, className = '', id, size = 'md', ...props }: InputProps) {
+  const autoId = useId()
+  const inputId = id || autoId
+  const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
+
   return (
     <div className="w-full">
-      {label && <label className="block text-sm text-[#9AA3A0] mb-2">{label}</label>}
+      {label && (
+        <label htmlFor={inputId} className="block text-sm font-semibold text-ink-700 mb-1.5">
+          {label}
+        </label>
+      )}
       <input
-        className={`w-full bg-[#1B1F1D] border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-[#9AA3A0] min-h-[48px] focus:outline-none focus:border-[#B6F500]/50 transition-colors ${className}`}
+        id={inputId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
+        className={`field ${size === 'lg' ? 'min-h-[56px] text-lg' : ''} ${error ? 'field-invalid' : ''} ${className}`}
         {...props}
       />
+      {error ? (
+        <p id={`${inputId}-error`} className="mt-1.5 text-sm text-error-700">{error}</p>
+      ) : hint ? (
+        <p id={`${inputId}-hint`} className="mt-1.5 text-sm text-ink-500">{hint}</p>
+      ) : null}
     </div>
   )
 }
+

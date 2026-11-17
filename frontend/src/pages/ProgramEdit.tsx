@@ -187,13 +187,13 @@ export default function ProgramEdit() {
   }
 
   if (status === 'loading') {
-    return <p className="text-text-secondary">در حال بارگذاری برنامه...</p>
+    return <p className="text-ink-600">در حال بارگذاری برنامه...</p>
   }
 
   if (status === 'error' || !program) {
     return (
       <Card>
-        <p className="text-white">{loadError || 'برنامه پیدا نشد'}</p>
+        <p className="text-ink-900">{loadError || 'برنامه پیدا نشد'}</p>
         <Link to="/athletes" className="inline-block mt-3">
           <Button variant="secondary">بازگشت به ورزشکاران</Button>
         </Link>
@@ -207,19 +207,19 @@ export default function ProgramEdit() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-xl font-bold text-white">ویرایش برنامه {toPersianDigits(program.sequence_number)}</h2>
-          <p className="text-sm text-text-secondary">
+          <h2 className="text-xl font-bold text-primary-900">ویرایش برنامه {toPersianDigits(program.sequence_number)}</h2>
+          <p className="text-sm text-ink-600">
             {athleteName ? `${athleteName} • ` : ''}شروع: {toJalali(program.start_date)}
           </p>
         </div>
-        <Link to={`/programs/${program.id}`} className="min-h-[48px] flex items-center text-sm text-white hover:text-accent">
+        <Link to={`/programs/${program.id}`} className="min-h-[48px] flex items-center text-sm text-ink-900 hover:text-accent-700">
           مشاهده برنامه
         </Link>
       </div>
 
       {notice && (
         <Card>
-          <p className={notice.kind === 'error' ? 'text-white font-medium' : 'text-accent font-medium'}>{notice.text}</p>
+          <p className={notice.kind === 'error' ? 'text-ink-900 font-medium' : 'text-accent-700 font-medium'}>{notice.text}</p>
         </Card>
       )}
 
@@ -236,27 +236,27 @@ export default function ProgramEdit() {
               value={form.start_date}
               onChange={(val) => setForm({ ...form, start_date: val })}
             />
-            <p className="text-sm text-text-secondary mt-1">
+            <p className="text-sm text-ink-600 mt-1">
               {form.start_date ? toJalali(form.start_date) : 'تاریخی انتخاب نشده'}
             </p>
           </div>
           <div>
-            <label className="block text-sm text-text-secondary mb-2" htmlFor="program-status">وضعیت</label>
+            <label className="block text-sm text-ink-600 mb-2" htmlFor="program-status">وضعیت</label>
             <select
               id="program-status"
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="w-full bg-surface2 border border-white/10 rounded-[16px] px-4 py-3 text-white min-h-[48px] focus:outline-none focus:border-accent/50"
+              className="w-full bg-surface-2 border border-border rounded-[16px] px-4 py-3 text-ink-900 min-h-[48px] focus:outline-none focus:border-accent-500/50"
             >
               <option value="draft">پیش‌نویس</option>
               <option value="final">نهایی</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm text-text-secondary mb-2" htmlFor="program-notes">یادداشت کلی (اختیاری)</label>
+            <label className="block text-sm text-ink-600 mb-2" htmlFor="program-notes">یادداشت کلی (اختیاری)</label>
             <textarea
               id="program-notes"
-              className="w-full min-h-[96px] bg-surface2 border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-text-secondary focus:outline-none focus:border-accent/50"
+              className="w-full min-h-[96px] bg-surface-2 border border-border rounded-[16px] px-4 py-3 text-ink-900 placeholder-text-secondary focus:outline-none focus:border-accent-500/50"
               placeholder="مثال: این ماه تمرکز روی فرم صحیح است"
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -268,7 +268,7 @@ export default function ProgramEdit() {
         </div>
       </Card>
 
-      <h3 className="font-semibold text-white pt-2">روزها و حرکات</h3>
+      <h3 className="font-semibold text-primary-900 pt-2">روزها و حرکات</h3>
       <ProgramStructureEditor
         days={days}
         onUpdateDayLabel={updateDayLabel}

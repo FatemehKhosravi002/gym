@@ -16,7 +16,9 @@ import InstallPrompt from './components/InstallPrompt'
 import ChangePassword from './pages/ChangePassword'
 import PendingCoaches from './pages/PendingCoaches'
 import SystemAdminPanel from './pages/SystemAdminPanel'
+import NewProgram from './pages/NewProgram'
 import Layout from './components/Layout'
+import { ToastProvider } from './components/Toast'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -37,7 +39,7 @@ function AppRoutes() {
         <Route path="/register" element={<Register />} />
         <Route path="/install" element={<InstallGuide />} />
         <Route path="/public/program/:token" element={<PublicProgram />} />
-        <Route path="/change-password" element={token ? <ChangePassword /> : <Navigate to="/login" />} />
+        <Route path="/change-password" element={token ? <Layout><ChangePassword /></Layout> : <Navigate to="/login" />} />
         <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
         <Route path="/athletes" element={<PrivateRoute><Layout><Athletes /></Layout></PrivateRoute>} />
         <Route path="/athletes/:id" element={<PrivateRoute><Layout><AthleteDetail /></Layout></PrivateRoute>} />
@@ -46,6 +48,7 @@ function AppRoutes() {
         <Route path="/templates" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
         <Route path="/templates/new" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
         <Route path="/templates/:id/edit" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
+        <Route path="/programs/new" element={<PrivateRoute><Layout><NewProgram /></Layout></PrivateRoute>} />
         <Route path="/programs/builder/:athleteId" element={<PrivateRoute><Layout><ProgramBuilder /></Layout></PrivateRoute>} />
         <Route path="/library" element={<PrivateRoute><Layout><Library /></Layout></PrivateRoute>} />
         <Route path="/pending-coaches" element={<PrivateRoute><Layout><PendingCoaches /></Layout></PrivateRoute>} />
@@ -60,7 +63,9 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppRoutes />
+        <ToastProvider>
+          <AppRoutes />
+        </ToastProvider>
       </BrowserRouter>
     </AuthProvider>
   )

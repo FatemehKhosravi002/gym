@@ -74,10 +74,10 @@ function ExercisePicker({ onPick, onClose }: ExercisePickerProps) {
   }, [search, category])
 
   return (
-    <div className="mt-3 p-3 bg-surface2 rounded-xl border border-white/10">
+    <div className="mt-3 p-3 bg-surface-2 rounded-xl border border-border">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-sm font-medium text-white">افزودن حرکت</p>
-        <button type="button" onClick={onClose} className="text-sm text-text-secondary hover:text-white min-h-[48px] px-2">
+        <p className="text-sm font-medium text-ink-900">افزودن حرکت</p>
+        <button type="button" onClick={onClose} className="text-sm text-ink-600 hover:text-ink-900 min-h-[48px] px-2">
           بستن
         </button>
       </div>
@@ -85,7 +85,7 @@ function ExercisePicker({ onPick, onClose }: ExercisePickerProps) {
         <button
           type="button"
           onClick={() => setCategory(null)}
-          className={`px-3 py-2 rounded-xl min-h-[48px] text-sm ${category === null ? 'bg-accent text-accent-text' : 'bg-surface1 text-white border border-white/10'}`}
+          className={`px-3 py-2 rounded-xl min-h-[48px] text-sm ${category === null ? 'bg-accent-500 text-ink-900' : 'bg-surface text-ink-900 border border-border'}`}
         >
           همه
         </button>
@@ -94,7 +94,7 @@ function ExercisePicker({ onPick, onClose }: ExercisePickerProps) {
             key={cat.id}
             type="button"
             onClick={() => setCategory(cat.id)}
-            className={`px-3 py-2 rounded-xl min-h-[48px] text-sm ${category === cat.id ? 'bg-accent text-accent-text' : 'bg-surface1 text-white border border-white/10'}`}
+            className={`px-3 py-2 rounded-xl min-h-[48px] text-sm ${category === cat.id ? 'bg-accent-500 text-ink-900' : 'bg-surface text-ink-900 border border-border'}`}
           >
             {cat.name}
           </button>
@@ -102,17 +102,17 @@ function ExercisePicker({ onPick, onClose }: ExercisePickerProps) {
       </div>
       <Input placeholder="جستجوی حرکت..." value={search} onChange={(e) => setSearch(e.target.value)} />
       <div className="mt-2 space-y-2 max-h-56 overflow-y-auto">
-        {loading && <p className="text-sm text-text-secondary">در حال بارگذاری...</p>}
-        {!loading && loadError && <p className="text-sm text-white">{loadError}</p>}
+        {loading && <p className="text-sm text-ink-600">در حال بارگذاری...</p>}
+        {!loading && loadError && <p className="text-sm text-ink-900">{loadError}</p>}
         {!loading && !loadError && results.length === 0 && (
-          <p className="text-sm text-text-secondary">حرکتی پیدا نشد.</p>
+          <p className="text-sm text-ink-600">حرکتی پیدا نشد.</p>
         )}
         {results.map((ex) => (
           <button
             key={ex.id}
             type="button"
             onClick={() => onPick(ex)}
-            className="w-full text-right p-3 bg-surface1 rounded-xl hover:bg-surface3 min-h-[48px] text-white border border-white/10"
+            className="w-full text-right p-3 bg-surface rounded-xl hover:bg-surface-3 min-h-[48px] text-ink-900 border border-border"
           >
             {ex.name}
           </button>
@@ -152,16 +152,16 @@ function ItemRow({ item, index, onUpdate, onDelete }: ItemRowProps) {
   const commit = (patch: Partial<EditorItem>) => { onUpdate(item.id, patch) }
 
   return (
-    <div className="p-3 bg-surface2 rounded-xl border border-white/10">
+    <div className="p-3 bg-surface-2 rounded-xl border border-border">
       <div className="flex items-start justify-between gap-2 mb-2">
-        <p className="font-medium text-white">
+        <p className="font-medium text-ink-900">
           {toPersianDigits(index + 1)}. {item.name}
         </p>
         <button
           type="button"
           disabled={removing}
           onClick={() => { setRemoving(true); onDelete(item.id).finally(() => setRemoving(false)) }}
-          className="text-sm text-text-secondary hover:text-white min-h-[48px] px-2 disabled:opacity-50"
+          className="text-sm text-ink-600 hover:text-ink-900 min-h-[48px] px-2 disabled:opacity-50"
         >
           {removing ? 'در حال حذف...' : 'حذف'}
         </button>
@@ -247,19 +247,19 @@ export default function ProgramStructureEditor({
     <div className="space-y-4">
       {days.length === 0 && (
         <Card>
-          <p className="text-text-secondary">هنوز روزی برای این برنامه ثبت نشده است.</p>
+          <p className="text-ink-600">هنوز روزی برای این برنامه ثبت نشده است.</p>
         </Card>
       )}
 
       {days.map((day) => (
         <Card key={day.id}>
           <div className="flex items-start justify-between gap-2 mb-3">
-            <h3 className="font-bold text-white">روز {toPersianDigits(day.day_index)}</h3>
+            <h3 className="font-bold text-primary-900">روز {toPersianDigits(day.day_index)}</h3>
             {onDeleteDay && (
               <button
                 type="button"
                 onClick={() => onDeleteDay(day.id)}
-                className="text-sm text-text-secondary hover:text-white min-h-[48px] px-2"
+                className="text-sm text-ink-600 hover:text-ink-900 min-h-[48px] px-2"
               >
                 حذف روز
               </button>
@@ -269,7 +269,7 @@ export default function ProgramStructureEditor({
           <DayLabelInput day={day} onSave={onUpdateDayLabel} />
 
           <div className="space-y-2 mt-3">
-            {day.items.length === 0 && <p className="text-sm text-text-secondary">حرکتی برای این روز ثبت نشده است.</p>}
+            {day.items.length === 0 && <p className="text-sm text-ink-600">حرکتی برای این روز ثبت نشده است.</p>}
             {day.items.map((item, idx) => (
               <ItemRow key={item.id} item={item} index={idx} onUpdate={onUpdateItem} onDelete={onDeleteItem} />
             ))}
@@ -294,7 +294,7 @@ export default function ProgramStructureEditor({
       {onAddDay && (
         <Button
           type="button"
-          variant="glass"
+          variant="outline"
           className="w-full"
           disabled={addingDay}
           onClick={() => { setAddingDay(true); onAddDay().finally(() => setAddingDay(false)) }}

@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
+import PasswordInput from '../components/PasswordInput'
+import { AlertIcon } from '../components/icons'
 
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -26,73 +27,80 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      const res = await login(username, password)
-      if (res?.must_change_password) {
+      const me = await login(username.trim(), password)
+      if (me?.must_change_password) {
         navigate('/change-password')
         return
       }
       navigate('/athletes')
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'نام کاربری یا رمز عبور اشتباه است')
+      const data = err.response?.data
+      setError(
+        data?.detail ||
+          (data?.username?.[0] ?? data?.password?.[0]) ||
+          'نام کاربری یا رمز عبور اشتباه است',
+      )
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]" dir="rtl">
-      <div className="lg:grid lg:grid-cols-2 min-h-screen">
-        <div className="relative h-48 lg:h-auto">
-          <div className="absolute -inset-5 bg-[#B6F500]/10 blur-[80px]"></div>
-          <img src="/IMG_1646.jpeg" alt="Physique" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-[#0A0A0A] to-transparent"></div>
-          <div className="absolute bottom-6 right-6 lg:hidden">
-            <div className="flex items-center gap-2">
-              <img src="/icons.svg" alt="Physique" className="h-8" />
-              <span className="text-xl font-bold text-white">Physique</span>
-            </div>
-          </div>
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <header className="border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <Link to="/" className="flex items-center gap-2" aria-label="Physique">
+            <img src="/brand/Logo.svg" alt="" className="h-9 w-auto md:h-11" />
+            <span className="text-lg font-bold text-primary-900">Physique</span>
+          </Link>
+          <Link to="/register" className="text-sm font-semibold text-primary-700 hover:text-primary-800">
+            ثبت‌نام مربی
+          </Link>
         </div>
-        <div className="flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-md space-y-6">
-            <div className="text-center space-y-2">
-              <div className="hidden lg:flex items-center justify-center gap-2 mb-6">
-                <img src="/icons.svg" alt="Physique" className="h-10" />
-                <span className="text-2xl font-bold text-white">Physique</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">ورود به حساب کاربری</h1>
-              <p className="text-[#9AA3A0]">برای دسترسی به پنل مربی وارد شوید</p>
+      </header>
+
+      <main className="flex flex-1 items-start justify-center px-4 py-8 sm:items-center">
+        <div className="w-full max-w-md rounded-card border border-border bg-surface p-6 shadow-soft sm:p-8">
+          <h1 className="text-2xl font-bold text-primary-900">ورود به حساب</h1>
+          <p className="mt-1 mb-6 text-sm text-ink-600">نام کاربری و رمز عبور خود را وارد کنید.</p>
+
+          {error && (
+            <div role="alert" className="mb-4 flex items-start gap-2 rounded-field border border-error-200 bg-error-50 p-3 text-sm text-error-700">
+              <AlertIcon className="mt-0.5 h-5 w-5 shrink-0" />
+              <span>{error}</span>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input label="نام کاربری" value={username} onChange={(e) => setUsername(e.target.value)} required autoComplete="username" autoFocus />
-              <div>
-                <label className="block text-sm text-[#9AA3A0] mb-2">رمز عبور</label>
-                <div className="relative">
-                  <input
-                    type={showPass ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="w-full bg-[#1B1F1D] border border-white/10 rounded-[16px] px-4 py-3 pl-12 text-white min-h-[48px] focus:outline-none focus:border-[#B6F500]/50"
-                  />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA3A0] text-sm min-h-[40px] px-2">
-                    {showPass ? 'پنهان' : 'نمایش'}
-                  </button>
-                </div>
-              </div>
-              {error && <p className="text-sm text-[#FF4D4F]">{error}</p>}
-              <Button type="submit" variant="primary" className="w-full" disabled={loading}>
-                {loading ? 'در حال ورود...' : 'ورود'}
-              </Button>
-            </form>
-            <div className="text-center space-y-2">
-              <Link to="/register" className="block text-[#B6F500]">ثبت‌نام مربی جدید</Link>
-              <Link to="/" className="block text-[#9AA3A0]">بازگشت به صفحه اصلی</Link>
-            </div>
-          </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <Input
+              label="نام کاربری"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoComplete="username"
+              autoFocus
+            />
+            <PasswordInput
+              label="رمز عبور"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+            <Button type="submit" size="lg" fullWidth loading={loading}>
+              {loading ? 'در حال ورود...' : 'ورود'}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-ink-600">
+            حساب ندارید؟{' '}
+            <Link to="/register" className="font-semibold text-primary-700 hover:text-primary-800">ثبت‌نام کنید</Link>
+          </p>
+          <p className="mt-2 text-center">
+            <Link to="/" className="text-sm text-ink-500 hover:text-ink-700">بازگشت به صفحه اصلی</Link>
+          </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

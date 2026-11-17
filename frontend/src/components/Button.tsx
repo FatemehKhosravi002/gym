@@ -1,26 +1,69 @@
 import React from 'react'
 
+type Variant = 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'danger'
+type Size = 'sm' | 'md' | 'lg'
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'glass' | 'secondary' | 'tertiary'
-  size?: 'sm' | 'md' | 'lg'
+  variant?: Variant
+  size?: Size
+  loading?: boolean
+  fullWidth?: boolean
+  icon?: React.ReactNode
 }
 
-export default function Button({ variant = 'primary', size = 'md', className = '', children, ...props }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center font-semibold transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#B6F500] focus:ring-offset-2 focus:ring-offset-[#0A0A0A] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 min-h-[48px]'
-  const variants = {
-    primary: 'bg-[#B6F500] text-[#0A0A0A] rounded-full shadow-[0_0_40px_-10px_rgba(182,245,0,0.5)]',
-    glass: 'bg-white/5 backdrop-blur-sm border border-white/10 text-white rounded-full',
-    secondary: 'bg-[#1B1F1D] text-white border border-white/10 rounded-full',
-    tertiary: 'bg-transparent text-[#9AA3A0] hover:text-white rounded-full',
-  }
-  const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg',
-  }
+const base =
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-pill ' +
+  'transition-all duration-base active:scale-[0.98] select-none ' +
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 ' +
+  'disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100'
+
+// Colours are chosen for WCAG AA on top of each fill:
+// primary  = green-700 + white        (5.3:1)
+// secondary= orange-500 + ink-900     (6.2:1)
+// tertiary = orange-50 + orange-700   (5.0:1) — orange text always uses 700 on light
+const variants: Record<Variant, string> = {
+  primary: 'bg-primary-700 text-white hover:bg-primary-800 shadow-glow',
+  secondary: 'bg-accent-500 text-ink-900 hover:bg-accent-400',
+  tertiary: 'bg-accent-50 text-accent-700 border border-accent-200 hover:bg-accent-100 hover:border-accent-300',
+  outline: 'bg-surface text-primary-900 border border-border-strong hover:border-primary-600 hover:bg-primary-50',
+  ghost: 'bg-transparent text-ink-700 hover:bg-surface-2',
+  danger: 'bg-error-700 text-white hover:bg-error-600',
+}
+
+const sizes: Record<Size, string> = {
+  sm: 'px-4 text-sm min-h-[44px]',
+  md: 'px-5 text-base min-h-[48px]',
+  lg: 'px-7 text-lg min-h-[56px]',
+}
+
+export default function Button({
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  fullWidth = false,
+  icon,
+  className = '',
+  children,
+  disabled,
+  ...props
+}: ButtonProps) {
   return (
-    <button className={`${base} ${variants[variant]} ${sizes[size]} ${className}`} {...props}>
+    <button
+      className={`${base} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading ? (
+        <span
+          className="inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin"
+          aria-hidden="true"
+        />
+      ) : (
+        icon
+      )}
       {children}
     </button>
   )
 }
+

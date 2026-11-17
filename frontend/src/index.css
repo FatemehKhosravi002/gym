@@ -4,58 +4,88 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink-900 font-sans antialiased;
+    min-height: 100vh;
+    line-height: 1.75;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-primary-900 font-bold;
+    line-height: 1.4;
+  }
+
+  /* Visible, consistent keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid theme('colors.primary.600');
+    outline-offset: 2px;
+  }
+
+  /* Persian digits in form controls and native pickers stay RTL-friendly. */
+  input, select, textarea, button {
+    font: inherit;
+  }
+
+  ::selection {
+    @apply bg-primary-200 text-ink-900;
+  }
+}
+
 @layer components {
-  .btn-primary {
-    @apply bg-[#B6F500] text-[#0A0A0A] rounded-full px-6 py-3 font-semibold min-h-[48px] transition-transform active:scale-95;
-    box-shadow: 0 0 40px -10px rgba(182, 245, 0, 0.5);
+  .card-surface {
+    @apply bg-surface border border-border rounded-card shadow-soft;
   }
-  .btn-glass {
-    @apply bg-white/5 backdrop-blur-sm border border-white/10 text-white rounded-full px-6 py-3 min-h-[48px] transition-transform active:scale-95;
+
+  .field {
+    @apply w-full bg-surface border border-border-strong rounded-field px-4 py-3 text-ink-900
+           placeholder:text-ink-500 min-h-[48px] transition-colors duration-base
+           hover:border-ink-400 focus:border-primary-600 focus:outline-none
+           focus:ring-2 focus:ring-primary-600/20;
   }
-  .card {
-    @apply bg-[#141716] border border-white/10 rounded-[24px] p-4;
-    box-shadow: var(--shadow-soft);
+
+  .field-invalid {
+    @apply border-error-600 focus:border-error-600 focus:ring-error-600/20;
   }
-  .card-glass {
-    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-[24px] p-4;
+
+  .skeleton {
+    @apply bg-surface-3 animate-pulse-soft rounded-field;
   }
-  .input {
-    @apply bg-[#1B1F1D] border border-white/10 rounded-[16px] px-4 py-3 text-white placeholder-[#9AA3A0] min-h-[48px];
-  }
-  .chip {
-    @apply px-4 py-2 rounded-full border border-white/10 text-[#9AA3A0] min-h-[44px] transition-colors;
-  }
-  .chip-active {
-    @apply bg-[#B6F500] text-[#0A0A0A] border-transparent;
+
+  .sheet-surface {
+    @apply bg-surface rounded-t-sheet md:rounded-sheet shadow-lifted;
   }
 }
 
-:root {
-  --text-primary: #ffffff;
-  --text-secondary: #e5e7eb;
-  --text-muted: #d1d5db;
+/* Native scrollbar tweak (light theme, no external assets). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-300) transparent;
 }
 
-body {
-  color: #ffffff;
-  background-color: #0A0A0A;
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-h1, h2, h3, h4, h5, h6, p, span, label, div {
-  color: inherit;
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-ink-300);
+  border-radius: 9999px;
 }
 
-input, textarea, select {
-  color: #ffffff !important;
-  background-color: #1B1F1D !important;
-}
-
-input::placeholder, textarea::placeholder {
-  color: #9CA3AF !important;
-}
-
-@supports not (backdrop-filter: blur(10px)) {
-  .glass-fallback {
-    background: rgba(27, 31, 29, 0.95);
+/* Users who ask for less motion get none of it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
+

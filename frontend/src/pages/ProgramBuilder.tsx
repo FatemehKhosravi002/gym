@@ -165,16 +165,16 @@ export default function ProgramBuilder() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
         <div className="w-full max-w-md space-y-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-white text-center">این برنامه چند روزه است؟</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-primary-900 text-center">این برنامه چند روزه است؟</h2>
           <div className="grid grid-cols-4 gap-3">
             {[1,2,3,4,5,6,7].map(n => (
               <button
                 key={n}
                 onClick={() => setSelectedDays(n)}
-                className={`h-16 sm:h-20 rounded-2xl text-xl sm:text-2xl font-bold min-h-[56px] border-2 transition-all focus:outline-none focus:ring-2 focus:ring-[#B6F500] ${
+                className={`h-16 sm:h-20 rounded-2xl text-xl sm:text-2xl font-bold min-h-[56px] border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary-600 ${
                   selectedDays === n 
-                    ? 'bg-[#B6F500] text-[#0A0A0A] border-[#B6F500]' 
-                    : 'bg-[#1B1F1D] text-white border-white/10'
+                    ? 'bg-primary-700 text-white border-primary-700' 
+                    : 'bg-surface-2 text-ink-900 border-border'
                 }`}
               >
                 {toPersianDigits(n)}
@@ -193,12 +193,12 @@ export default function ProgramBuilder() {
         <Card className="mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-bold text-white">{athleteInfo.first_name} {athleteInfo.last_name}</p>
-              <p className="text-sm text-[#d1d5db]">کد: {toPersianDigits(athleteInfo.unique_code)}</p>
+              <p className="font-bold text-ink-900">{athleteInfo.first_name} {athleteInfo.last_name}</p>
+              <p className="text-sm text-ink-600">کد: {toPersianDigits(athleteInfo.unique_code)}</p>
               {athleteInfo.last_measurement ? (
-                <p className="text-sm text-[#d1d5db] mt-1">وزن: {toPersianDigits(athleteInfo.last_measurement.weight_kg)} کیلوگرم {athleteInfo.last_measurement.height_cm && `| قد: ${toPersianDigits(athleteInfo.last_measurement.height_cm)} سانتی‌متر`}</p>
+                <p className="text-sm text-ink-600 mt-1">وزن: {toPersianDigits(athleteInfo.last_measurement.weight_kg)} کیلوگرم {athleteInfo.last_measurement.height_cm && `| قد: ${toPersianDigits(athleteInfo.last_measurement.height_cm)} سانتی‌متر`}</p>
               ) : (
-                <p className="text-sm text-[#9CA3AF] mt-1">قد و وزن ثبت نشده</p>
+                <p className="text-sm text-ink-500 mt-1">قد و وزن ثبت نشده</p>
               )}
             </div>
             <Button size="sm" onClick={() => setShowMeasure(true)}>ثبت وزن/قد</Button>
@@ -208,11 +208,11 @@ export default function ProgramBuilder() {
 
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-white">روز {toPersianDigits(currentDay)} از {toPersianDigits(daysPerWeek)}</h2>
+          <h2 className="font-semibold text-primary-900">روز {toPersianDigits(currentDay)} از {toPersianDigits(daysPerWeek)}</h2>
         </div>
         <div className="flex gap-1">
           {Array.from({length: daysPerWeek}).map((_, i) => (
-            <div key={i} className={`flex-1 h-2 rounded-full ${i+1 <= currentDay ? 'bg-[#B6F500]' : 'bg-[#1B1F1D]'}`} />
+            <div key={i} className={`flex-1 h-2 rounded-full ${i+1 <= currentDay ? 'bg-primary-500' : 'bg-surface-2'}`} />
           ))}
         </div>
       </div>
@@ -222,11 +222,11 @@ export default function ProgramBuilder() {
       </Card>
 
       <Card className="mb-4">
-        <p className="font-medium mb-3 text-white">انتخاب حرکت</p>
+        <p className="font-medium mb-3 text-ink-900">انتخاب حرکت</p>
         <div className="flex flex-wrap gap-2 mb-3">
-          <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-[#B6F500] text-[#0A0A0A]' : 'bg-[#1B1F1D] text-white border border-white/10'}`}>همه</button>
+          <button onClick={() => setSelectedCat(null)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === null ? 'bg-primary-500 text-ink-900' : 'bg-surface-2 text-ink-900 border border-border'}`}>همه</button>
           {categories.map(cat => (
-            <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === cat.id ? 'bg-[#B6F500] text-[#0A0A0A]' : 'bg-[#1B1F1D] text-white border border-white/10'}`}>{cat.name}</button>
+            <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`px-3 py-2 rounded-xl min-h-[44px] text-sm ${selectedCat === cat.id ? 'bg-primary-500 text-ink-900' : 'bg-surface-2 text-ink-900 border border-border'}`}>{cat.name}</button>
           ))}
         </div>
         <Input placeholder="جستجوی حرکت..." value={searchEx} onChange={(e) => setSearchEx(e.target.value)} />
@@ -235,7 +235,7 @@ export default function ProgramBuilder() {
             <button
               key={ex.id}
               onClick={() => addExercise(ex)}
-              className="w-full text-right p-3 bg-[#1B1F1D] rounded-xl hover:bg-[#232826] min-h-[44px] text-white border border-white/10"
+              className="w-full text-right p-3 bg-surface-2 rounded-xl hover:bg-surface-3 min-h-[44px] text-ink-900 border border-border"
             >
               {ex.name}
             </button>
@@ -245,22 +245,22 @@ export default function ProgramBuilder() {
 
       {currentItems.length > 0 && (
         <Card className="mb-4">
-          <p className="font-medium mb-3 text-white">حرکات این روز</p>
+          <p className="font-medium mb-3 text-ink-900">حرکات این روز</p>
           <div className="space-y-2">
             {currentItems.map((item, idx) => (
-              <div key={item.tempId || idx} className="flex items-center gap-2 p-2 bg-[#1B1F1D] rounded-xl border border-white/10">
-                <span className="text-sm text-[#d1d5db] w-6">{toPersianDigits(idx + 1)}</span>
-                <span className="flex-1 text-sm text-white">{item.exercise_detail?.name}</span>
-                <input className="w-12 px-2 py-1 border border-white/10 rounded text-center text-sm text-white bg-[#0F1110]" value={item.sets} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].sets=e.target.value; setCurrentItems(newItems); }} />
-                <span className="text-white">×</span>
-                <input className="w-16 px-2 py-1 border border-white/10 rounded text-center text-sm text-white bg-[#0F1110]" value={item.reps} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].reps=e.target.value; setCurrentItems(newItems); }} />
+              <div key={item.tempId || idx} className="flex items-center gap-2 p-2 bg-surface-2 rounded-xl border border-border">
+                <span className="text-sm text-ink-600 w-6">{toPersianDigits(idx + 1)}</span>
+                <span className="flex-1 text-sm text-ink-900">{item.exercise_detail?.name}</span>
+                <input className="w-12 px-2 py-1 border border-border rounded text-center text-sm text-ink-900 bg-surface-2" value={item.sets} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].sets=e.target.value; setCurrentItems(newItems); }} />
+                <span className="text-ink-900">×</span>
+                <input className="w-16 px-2 py-1 border border-border rounded text-center text-sm text-ink-900 bg-surface-2" value={item.reps} onChange={(e) => { const newItems=[...currentItems]; newItems[idx].reps=e.target.value; setCurrentItems(newItems); }} />
               </div>
             ))}
           </div>
         </Card>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-[#141716] border-t border-white/10 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border p-4">
         <div className="max-w-7xl mx-auto flex gap-2">
           {currentDay > 1 && <Button variant="secondary" onClick={() => { setCurrentDay(currentDay-1); setCurrentItems([]); }} className="flex-1">روز قبل</Button>}
           <Button onClick={saveAndNext} disabled={currentItems.length === 0} className="flex-1">
@@ -270,9 +270,9 @@ export default function ProgramBuilder() {
       </div>
 
       {showMeasure && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-end sm:items-center justify-center z-50">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50">
           <Card className="w-full sm:max-w-md m-4">
-            <h3 className="font-semibold mb-4 text-white">ثبت وزن و قد</h3>
+            <h3 className="font-semibold mb-4 text-primary-900">ثبت وزن و قد</h3>
             <form onSubmit={saveMeasurement} className="space-y-3">
               <Input label="وزن (کیلوگرم)" value={measureForm.weight_kg} onChange={(e) => setMeasureForm({...measureForm, weight_kg: e.target.value})} required />
               <Input label="قد (سانتی‌متر)" value={measureForm.height_cm} onChange={(e) => setMeasureForm({...measureForm, height_cm: e.target.value})} />
@@ -287,18 +287,18 @@ export default function ProgramBuilder() {
       )}
 
       {duplicateAlert && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-end sm:items-center justify-center z-50" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 bg-ink-900/40 flex items-end sm:items-center justify-center z-50" role="dialog" aria-modal="true">
           <Card className="w-full sm:max-w-md m-4">
             {duplicateAlert.sameDay ? (
               <>
-                <p className="text-white mb-4">این حرکت در روز {toPersianDigits(duplicateAlert.day)} همین برنامه هم هست</p>
+                <p className="text-ink-900 mb-4">این حرکت در روز {toPersianDigits(duplicateAlert.day)} همین برنامه هم هست</p>
                 <div className="flex gap-2">
                   <Button variant="secondary" onClick={() => setDuplicateAlert(null)} className="flex-1">انصراف</Button>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-white mb-4">این حرکت قبلاً در برنامهٔ {toPersianDigits(duplicateAlert.info.sequence_number || duplicateAlert.info.program_number)} ({duplicateAlert.info.label || toJalaliMonth(duplicateAlert.info.date)}) بوده است</p>
+                <p className="text-ink-900 mb-4">این حرکت قبلاً در برنامهٔ {toPersianDigits(duplicateAlert.info.sequence_number || duplicateAlert.info.program_number)} ({duplicateAlert.info.label || toJalaliMonth(duplicateAlert.info.date)}) بوده است</p>
                 <div className="flex gap-2">
                   <Button onClick={confirmAddDuplicate} className="flex-1">اضافه کن</Button>
                   <Button variant="secondary" onClick={() => setDuplicateAlert(null)} className="flex-1">انصراف</Button>

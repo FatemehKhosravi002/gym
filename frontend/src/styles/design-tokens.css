@@ -1,27 +1,75 @@
+/* Design tokens (single source of truth for CSS variables).
+   Tailwind mirror: tailwind.config.js — keep both in sync. */
 :root {
-  --bg: #0A0A0A;
-  --bg-2: #0F1110;
-  --surface-1: #141716;
-  --surface-2: #1B1F1D;
-  --surface-3: #232826;
-  --border: rgba(255, 255, 255, 0.08);
-  --text-primary: #FFFFFF;
-  --text-secondary: #9AA3A0;
-  --accent: #B6F500;
-  --accent-text: #0A0A0A;
-  --danger: #FF4D4F;
-  
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
-  --radius-2xl: 28px;
+  --color-primary-50: #F0FDF4;
+  --color-primary-100: #DCFCE7;
+  --color-primary-200: #BBF7D0;
+  --color-primary-300: #86EFAC;
+  --color-primary-400: #4ADE80;
+  --color-primary-500: #22C55E;
+  --color-primary-600: #16A34A;
+  --color-primary-700: #15803D;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532D;
+
+  --color-accent-50: #FFF7ED;
+  --color-accent-100: #FFEDD5;
+  --color-accent-200: #FED7AA;
+  --color-accent-300: #FDBA74;
+  --color-accent-400: #FB923C;
+  --color-accent-500: #F97316;
+  --color-accent-600: #EA580C;
+  --color-accent-700: #C2410C;
+  --color-accent-800: #9A3412;
+  --color-accent-900: #7C2D12;
+
+  --color-ink-900: #0F1B12;
+  --color-ink-800: #1B2A20;
+  --color-ink-700: #2E4034;
+  --color-ink-600: #45564B;
+  --color-ink-500: #64756A;
+  --color-ink-400: #96A29A;
+  --color-ink-300: #C7D0C9;
+
+  --color-canvas: #F7FAF5;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F1F6EF;
+  --color-surface-3: #E7EFE3;
+  --color-border: #E3EADF;
+  --color-border-strong: #CBD8C8;
+
+  --color-success-50: #ECFDF3;
+  --color-success-600: #079455;
+  --color-success-700: #067647;
+  --color-warning-50: #FFFAEB;
+  --color-warning-600: #B54708;
+  --color-warning-700: #93370D;
+  --color-error-50: #FEF3F2;
+  --color-error-600: #D92D20;
+  --color-error-700: #B42318;
+
+  --radius-field: 16px;
+  --radius-card: 24px;
+  --radius-sheet: 28px;
   --radius-pill: 9999px;
-  --radius-sheet: 32px;
-  
-  --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 80px -20px rgba(182, 245, 0, 0.4);
-  --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  --shadow-soft: 0 1px 2px rgba(15, 27, 18, 0.04), 0 8px 24px -12px rgba(15, 27, 18, 0.12);
+  --shadow-lifted: 0 2px 4px rgba(15, 27, 18, 0.05), 0 18px 40px -18px rgba(15, 27, 18, 0.22);
+
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 250ms;
+
+  --font-sans: 'Sahel FD', Tahoma, sans-serif;
+  --topbar-height: 56px;
+  --tabbar-height: 64px;
+  --sidebar-width: 248px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --topbar-height: 64px;
+  }
 }
 
 @font-face {
@@ -63,3 +111,4 @@
   font-style: normal;
   font-display: swap;
 }
+

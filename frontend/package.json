@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && node scripts/check-design.mjs && vite build",
     "lint": "oxlint",
+    "check:design": "node scripts/check-design.mjs",
+    "test:utils": "node --test scripts/utils.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
