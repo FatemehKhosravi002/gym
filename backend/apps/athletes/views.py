@@ -1,119 +1,301 @@
-from rest_framework import viewsets, filters, status
+import difflib
+
+from django.db import IntegrityError
+from django.db.models import Count, F, Max, Q
+from django.db.models.functions import Coalesce
+from django.utils import timezone
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
-from .models import Athlete
-from .serializers import AthleteSerializer
+from rest_framework.response import Response
+
+from .models import Athlete, AthleteCodeArchive, AthleteProfile, Measurement, normalize_persian
 from .permissions import IsCoachOrAdmin
+from .serializers import (
+    AthleteDetailSerializer,
+    AthleteSerializer,
+    AthleteWriteSerializer,
+    MeasurementSerializer,
+)
+from .serializers_profile import AthleteProfileSerializer
+
+ACTIVE_WINDOW_DAYS = 30
+FUZZY_POOL_LIMIT = 800
+FUZZY_CUTOFF = 0.72
+
+
+class AthletePagination(PageNumberPagination):
+    page_size = 12
+    page_size_query_param = 'page_size'
+    max_page_size = 60
+
+
+def is_admin_user(user):
+    return bool(user.is_staff or getattr(user, 'is_admin', lambda: False)())
+
+
+def apply_search(qs, query):
+    """Token AND search on the normalized index (ی/ي، ک/ك، ZWNJ, spaces tolerant)."""
+    tokens = normalize_persian(query).split()
+    for token in tokens:
+        qs = qs.filter(search_index__contains=token)
+    return qs
+
+
+def annotate_athlete_queryset(qs):
+    return qs.annotate(
+        programs_count_annotated=Count('programs', distinct=True),
+        measurements_count_annotated=Count('measurements', distinct=True),
+        last_program_date=Max('programs__start_date'),
+        last_activity=Coalesce(Max('programs__created_at'), F('created_at')),
+    )
+
+
+ORDERING_MAP = {
+    'name': ('first_name', 'last_name'),
+    '-name': ('-first_name', '-last_name'),
+    'newest': ('-created_at',),
+    'oldest': ('created_at',),
+    'code': ('unique_code',),
+    'last_program': ('-last_program_date', '-created_at'),
+    'last_active': ('-last_activity',),
+}
 
 
 class AthleteViewSet(viewsets.ModelViewSet):
-    serializer_class = AthleteSerializer
     permission_classes = [IsAuthenticated, IsCoachOrAdmin]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['first_name', 'last_name', 'unique_code']
-    ordering = ['-created_at']
+    pagination_class = AthletePagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = []
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return AthleteWriteSerializer
+        if self.action == 'list':
+            return AthleteSerializer
+        return AthleteDetailSerializer
+
+    def base_queryset(self):
+        user = self.request.user
+        qs = Athlete.objects.select_related('coach')
+        if not is_admin_user(user):
+            qs = qs.filter(coach=user)
+        return qs
 
     def get_queryset(self):
-        user = self.request.user
-        if getattr(user, 'is_admin', lambda: False)() or user.is_staff:
-            return Athlete.objects.all()
-        return Athlete.objects.filter(coach=user)
+        qs = self.base_queryset()
+        params = self.request.query_params
+        trash = self.action == 'trash' or params.get('deleted') in ('1', 'true')
+        qs = qs.filter(deleted_at__isnull=not trash)
+        qs = annotate_athlete_queryset(qs)
+
+        if self.action not in ('list', 'trash', 'search_combined'):
+            if self.action in ('retrieve', 'update', 'partial_update'):
+                return qs.prefetch_related('measurements')
+            return qs
+
+        query = params.get('search') or params.get('q') or ''
+        if query.strip():
+            exact = apply_search(qs, query)
+            if exact.exists():
+                qs = exact
+            elif len(normalize_persian(query)) >= 3:
+                qs = qs.filter(pk__in=self._fuzzy_ids(query, None))
+            else:
+                qs = exact
+
+        levels = [lvl for lvl in (params.get('level') or '').split(',') if lvl]
+        if levels:
+            qs = qs.filter(level__in=levels)
+        if params.get('has_note') in ('1', 'true'):
+            qs = qs.filter(Q(notes__regex=r'\S') | ~Q(note_tags=[]))
+        if params.get('has_note') in ('0', 'false'):
+            qs = qs.filter(notes__regex=r'^\s*$', note_tags=[])
+        if params.get('has_programs') in ('1', 'true'):
+            qs = qs.filter(programs_count_annotated__gt=0)
+        if params.get('has_programs') in ('0', 'false'):
+            qs = qs.filter(programs_count_annotated=0)
+        if params.get('active') in ('1', 'true'):
+            since = timezone.now() - timezone.timedelta(days=ACTIVE_WINDOW_DAYS)
+            qs = qs.filter(last_activity__gte=since)
+
+        order = ORDERING_MAP.get(params.get('ordering') or 'newest', ORDERING_MAP['newest'])
+        return qs.order_by(*order)
+
+    def _with_annotations(self, athlete_id):
+        return annotate_athlete_queryset(self.base_queryset()).filter(pk=athlete_id).first()
 
     def perform_create(self, serializer):
         serializer.save(coach=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        serializer = AthleteWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        athlete = serializer.save(coach=request.user)
+        return Response(AthleteDetailSerializer(athlete, context={'request': request}).data, status=201)
+
+    def update(self, request, *args, **kwargs):
+        athlete = self.get_object()
+        serializer = AthleteWriteSerializer(athlete, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(AthleteDetailSerializer(athlete, context={'request': request}).data)
+
+    def destroy(self, request, *args, **kwargs):
+        athlete = self.get_object()
+        athlete.deleted_at = timezone.now()
+        athlete.deleted_by = request.user
+        athlete.save(update_fields=['deleted_at', 'deleted_by', 'search_index'])
+        return Response({'status': 'deleted', 'restorable': True})
+
+    def _deleted_queryset(self):
+        return self.base_queryset().filter(deleted_at__isnull=False)
+
+    @action(detail=False, methods=['get'])
+    def trash(self, request):
+        qs = self._deleted_queryset().order_by('-deleted_at')
+        page = self.paginate_queryset(qs)
+        data = AthleteSerializer(page, many=True).data
+        return self.get_paginated_response(data)
+
+    @action(detail=True, methods=['post'])
+    def restore(self, request, pk=None):
+        athlete = self._deleted_queryset().filter(pk=pk).first()
+        if not athlete:
+            return Response({'detail': 'ورزشکار حذف‌شده‌ای با این شناسه پیدا نشد.'}, status=404)
+        athlete.deleted_at = None
+        athlete.deleted_by = None
+        athlete.save(update_fields=['deleted_at', 'deleted_by', 'search_index'])
+        return Response(AthleteDetailSerializer(athlete).data)
+
+    @action(detail=True, methods=['post'], url_path='purge')
+    def purge(self, request, pk=None):
+        athlete = self._deleted_queryset().filter(pk=pk).first()
+        if not athlete:
+            return Response({'detail': 'ابتدا ورزشکار را به سطل زباله ببرید.'}, status=400)
+        if athlete.programs.exists():
+            return Response(
+                {'detail': 'این ورزشکار برنامه دارد و برای همیشه حذف نمی‌شود. برنامه‌ها را اول حذف کنید.'},
+                status=400,
+            )
+        code = (request.data.get('confirm_code') or '').strip()
+        if code != athlete.unique_code:
+            return Response({'confirm_code': 'کد ورزشکار را دقیقاً وارد کنید.'}, status=400)
+        AthleteCodeArchive.objects.get_or_create(code=athlete.unique_code,
+                                                 defaults={'athlete_name': athlete.full_name})
+        athlete.delete()
+        return Response({'status': 'purged'}, status=204)
+
     @action(detail=False, methods=['get'])
     def search_combined(self, request):
-        q = request.query_params.get('q', '').strip()
-        if not q:
+        query = (request.query_params.get('q') or '').strip()
+        if not query:
             return Response([])
-        # Search across first_name, last_name, unique_code with simple contains
-        qs = self.get_queryset().filter(
-            Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(unique_code__icontains=q)
-        )
-        serializer = self.get_serializer(qs[:20], many=True)
-        return Response(serializer.data)
+        qs = self.get_queryset()
+        limit = min(int(request.query_params.get('limit') or 20), 50)
+        rows = list(qs[:limit])
+        if not rows and len(normalize_persian(query)) >= 3:
+            rows = self._fuzzy_matches(query, limit)
+        return Response(AthleteSerializer(rows, many=True).data)
 
+    def _fuzzy_ids(self, query, limit):
+        needle = normalize_persian(query)
+        pool = self.base_queryset().filter(deleted_at__isnull=True).values('id', 'search_index')[:FUZZY_POOL_LIMIT]
+        scored = []
+        for row in pool:
+            haystack = row['search_index'] or ''
+            if not haystack:
+                continue
+            score = max(
+                difflib.SequenceMatcher(None, needle, haystack).ratio(),
+                difflib.SequenceMatcher(None, needle, haystack.replace(' ', '')).ratio(),
+                max((difflib.SequenceMatcher(None, token, part).ratio()
+                     for token in needle.split() for part in haystack.split()), default=0),
+            )
+            if score >= FUZZY_CUTOFF:
+                scored.append((score, row['id']))
+        scored.sort(reverse=True)
+        return [row_id for _, row_id in scored[:limit or 50]]
 
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from .models import AthleteProfile, Measurement
-from .serializers_profile import AthleteProfileSerializer, MeasurementSerializer
-from django.utils import timezone
+    def _fuzzy_matches(self, query, limit):
+        """Cheap typo tolerance over the coach's own (already normalized) rows."""
+        needle = normalize_persian(query)
+        pool = self.base_queryset().filter(deleted_at__isnull=True).values('id', 'search_index')[:FUZZY_POOL_LIMIT]
+        scored = []
+        for row in pool:
+            haystack = row['search_index'] or ''
+            if not haystack:
+                continue
+            score = max(
+                difflib.SequenceMatcher(None, needle, haystack).ratio(),
+                difflib.SequenceMatcher(None, needle, haystack.replace(' ', '')).ratio(),
+                max((difflib.SequenceMatcher(None, token, part).ratio()
+                     for token in needle.split() for part in haystack.split()), default=0),
+            )
+            if score >= FUZZY_CUTOFF:
+                scored.append((score, row['id']))
+        scored.sort(reverse=True)
+        ids = [row_id for _, row_id in scored[:limit]]
+        if not ids:
+            return []
+        found = annotate_athlete_queryset(self.base_queryset().filter(id__in=ids))
+        by_id = {a.id: a for a in found}
+        return [by_id[i] for i in ids if i in by_id]
 
-
-class ProfileMixin:
     @action(detail=True, methods=['get', 'post'])
     def profile(self, request, pk=None):
         athlete = self.get_object()
+        profile, _ = AthleteProfile.objects.get_or_create(athlete=athlete)
         if request.method == 'POST':
-            profile, _ = AthleteProfile.objects.get_or_create(athlete=athlete)
             serializer = AthleteProfileSerializer(profile, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data)
-        profile, _ = AthleteProfile.objects.get_or_create(athlete=athlete)
-        serializer = AthleteProfileSerializer(profile)
-        return Response(serializer.data)
+        return Response(AthleteProfileSerializer(profile).data)
+
+    def _measurement_queryset(self, athlete):
+        return Measurement.objects.filter(athlete=athlete, deleted_at__isnull=True)
 
     @action(detail=True, methods=['get', 'post'])
     def measurements(self, request, pk=None):
         athlete = self.get_object()
         if request.method == 'POST':
-            data = request.data.copy()
-            data['athlete'] = athlete.id
-            serializer = MeasurementSerializer(data=data)
+            payload = request.data.copy()
+            payload['athlete'] = athlete.id
+            serializer = MeasurementSerializer(data=payload, context={'athlete': athlete})
             serializer.is_valid(raise_exception=True)
-            m = serializer.save()
-            # update profile
-            profile, _ = AthleteProfile.objects.get_or_create(athlete=athlete)
-            profile.weight_kg = m.weight_kg
-            if m.height_cm:
-                profile.height_cm = m.height_cm
-            if m.level:
-                profile.level = m.level
-            profile.save()
-            return Response(serializer.data, status=201)
-        qs = Measurement.objects.filter(athlete=athlete, deleted_at__isnull=True).order_by('-date')
-        serializer = MeasurementSerializer(qs, many=True)
-        return Response(serializer.data)
+            try:
+                measurement = serializer.save(athlete=athlete)
+            except IntegrityError:
+                return Response(
+                    {'date': 'برای این روز قبلاً اندازه‌گیری ثبت شده است. همان را ویرایش کنید.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return Response(MeasurementSerializer(measurement).data, status=status.HTTP_201_CREATED)
+        qs = self._measurement_queryset(athlete).order_by('date', 'id')
+        return Response(MeasurementSerializer(qs, many=True).data)
 
-    @action(detail=True, methods=['post'], url_path='measurements/(?P<m_id>[^/.]+)/delete')
-    def measurement_delete(self, request, pk=None, m_id=None):
+    @action(detail=True, methods=['get', 'patch', 'delete'],
+            url_path='measurements/(?P<m_id>[0-9]+)')
+    def measurement_detail(self, request, pk=None, m_id=None):
         athlete = self.get_object()
-        try:
-            m = Measurement.objects.get(pk=m_id, athlete=athlete)
-        except Measurement.DoesNotExist:
-            return Response({'detail': 'یافت نشد'}, status=404)
-        m.deleted_at = timezone.now()
-        m.deleted_by = request.user
-        m.save()
-        return Response({'status': 'deleted'})
+        measurement = self._measurement_queryset(athlete).filter(pk=m_id).first()
+        if not measurement:
+            return Response({'detail': 'این اندازه‌گیری پیدا نشد.'}, status=404)
+        if request.method == 'DELETE':
+            measurement.deleted_at = timezone.now()
+            measurement.deleted_by = request.user
+            measurement.save(update_fields=['deleted_at', 'deleted_by'])
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'PATCH':
+            payload = request.data.copy()
+            payload.pop('athlete', None)
+            serializer = MeasurementSerializer(measurement, data=payload, partial=True, context={'athlete': athlete})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(MeasurementSerializer(measurement).data)
+        return Response(MeasurementSerializer(measurement).data)
 
-
-class AthleteViewSet(AthleteViewSet, ProfileMixin):
-    pass
-
-
-from .serializers import AthleteDetailSerializer
-from rest_framework.decorators import action
-from rest_framework.response import Response
-
-
-class AthleteViewSetFull(AthleteViewSet):
-    serializer_class = AthleteDetailSerializer
-
-
-class AthleteViewSet(AthleteViewSet):
-    serializer_class = AthleteDetailSerializer
-
-
-class AthleteViewSet(AthleteViewSet):
-    def get_serializer_class(self):
-        if self.action in ['update', 'partial_update']:
-            from .serializers import AthleteUpdateSerializer
-            return AthleteUpdateSerializer
-        from .serializers import AthleteDetailSerializer
-        return AthleteDetailSerializer
+    @action(detail=True, methods=['post'], url_path='measurements/(?P<m_id>[0-9]+)/delete')
+    def measurement_delete(self, request, pk=None, m_id=None):
+        return self.measurement_detail(request, pk=pk, m_id=m_id)
