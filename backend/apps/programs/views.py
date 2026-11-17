@@ -16,9 +16,10 @@ class ProgramViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        qs = Program.objects.select_related('athlete__coach', 'coach').prefetch_related('days__items__exercise__category')
         if getattr(user, 'is_admin', lambda: False)() or user.is_staff:
-            return Program.objects.select_related('athlete', 'coach').prefetch_related('days__items__exercise__category').filter(is_archived=False)
-        return Program.objects.select_related('athlete', 'coach').prefetch_related('days__items__exercise__category').filter(coach=user, is_archived=False)
+            return qs.filter(is_archived=False)
+        return qs.filter(coach=user, is_archived=False)
 
     def perform_create(self, serializer):
         serializer.save(coach=self.request.user)

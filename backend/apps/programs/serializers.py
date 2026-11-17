@@ -1,11 +1,21 @@
 from rest_framework import serializers
 from .models import Program, ProgramDay, ProgramItem
 from apps.athletes.serializers import AthleteSerializer
-from apps.library.serializers import ExerciseSerializer
+from apps.library.models import Exercise
+
+
+class ProgramItemExerciseSerializer(serializers.ModelSerializer):
+    """Lightweight exercise payload for program items (no per-row usage_count query)."""
+
+    category_name = serializers.CharField(source='category.name', read_only=True)
+
+    class Meta:
+        model = Exercise
+        fields = ['id', 'name', 'category', 'category_name', 'video_file', 'video_url', 'gif_file', 'description', 'is_active']
 
 
 class ProgramItemSerializer(serializers.ModelSerializer):
-    exercise_detail = ExerciseSerializer(source='exercise', read_only=True)
+    exercise_detail = ProgramItemExerciseSerializer(source='exercise', read_only=True)
 
     class Meta:
         model = ProgramItem

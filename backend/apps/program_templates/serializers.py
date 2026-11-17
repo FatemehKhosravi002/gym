@@ -1,14 +1,13 @@
 from rest_framework import serializers
 from .models import ProgramTemplate, ProgramTemplateDay, ProgramTemplateItem
-from apps.library.serializers import ExerciseSerializer
 
 
 class ProgramTemplateItemSerializer(serializers.ModelSerializer):
-    exercise_detail = ExerciseSerializer(source='exercise', read_only=True)
+    exercise_name = serializers.CharField(source='exercise.name', read_only=True)
 
     class Meta:
         model = ProgramTemplateItem
-        fields = ['id', 'exercise', 'exercise_detail', 'order', 'sets', 'reps', 'rest_seconds', 'note', 'superset_group']
+        fields = ['id', 'exercise', 'exercise_name', 'order', 'sets', 'reps', 'rest_seconds', 'note', 'superset_group']
 
 
 class ProgramTemplateDaySerializer(serializers.ModelSerializer):

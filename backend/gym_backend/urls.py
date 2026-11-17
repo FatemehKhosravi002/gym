@@ -16,6 +16,8 @@ urlpatterns = [
     path('api/program-items/', include('apps.programs.urls_items')),
     path('api/admin/', include('apps.admin_panel.urls')),
     path('api/program-templates/', include('apps.program_templates.urls')),
+    path('api/program-template-days/', include('apps.program_templates.urls_days')),
+    path('api/program-template-items/', include('apps.program_templates.urls_items')),
 ]
 
 if settings.DEBUG:

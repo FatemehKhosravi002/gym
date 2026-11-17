@@ -16,8 +16,8 @@ class ProgramTemplateViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if getattr(user, 'is_admin', lambda: False)() or user.is_superuser:
-            return ProgramTemplate.objects.all().prefetch_related('days__items__exercise__category')
-        return ProgramTemplate.objects.filter(coach=user).prefetch_related('days__items__exercise__category')
+            return ProgramTemplate.objects.all().prefetch_related('days__items__exercise')
+        return ProgramTemplate.objects.filter(coach=user).prefetch_related('days__items__exercise')
 
     def perform_create(self, serializer):
         serializer.save(coach=self.request.user)
