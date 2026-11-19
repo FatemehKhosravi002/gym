@@ -40,7 +40,7 @@ class ProgramTemplateDayViewSet(viewsets.ModelViewSet):
     filterset_fields = ['template']
 
     def get_queryset(self):
-        qs = ProgramTemplateDay.objects.select_related('template').order_by('day_index')
+        qs = ProgramTemplateDay.objects.select_related('template').filter(template__deleted_at__isnull=True).order_by('day_index')
         if is_admin_user(self.request.user):
             return qs
         return qs.filter(template__coach=self.request.user)
@@ -52,7 +52,9 @@ class ProgramTemplateItemViewSet(viewsets.ModelViewSet):
     filterset_fields = ['template_day']
 
     def get_queryset(self):
-        qs = ProgramTemplateItem.objects.select_related('template_day__template', 'exercise__category')
+        qs = ProgramTemplateItem.objects.select_related('template_day__template', 'exercise__category').filter(
+            template_day__template__deleted_at__isnull=True,
+        )
         if is_admin_user(self.request.user):
             return qs.order_by('order')
         return qs.filter(template_day__template__coach=self.request.user).order_by('order')

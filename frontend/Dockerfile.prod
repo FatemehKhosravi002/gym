@@ -1,4 +1,5 @@
-FROM node:20-alpine AS builder
+# Vite 8 requires Node ^20.19 || >=22.12; pin 22-alpine to avoid a too-old 20.x tag.
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 COPY package*.json ./

@@ -19,6 +19,9 @@ from .serializers import (
     MeasurementSerializer,
 )
 from .serializers_profile import AthleteProfileSerializer
+from apps.programs.history import exercise_history as build_exercise_history
+from apps.programs.history import frequent_exercises as frequent_exercise_list
+from apps.programs.history import repeat_counts as build_repeat_counts
 
 ACTIVE_WINDOW_DAYS = 30
 FUZZY_POOL_LIMIT = 800
@@ -58,8 +61,8 @@ ORDERING_MAP = {
     'newest': ('-created_at',),
     'oldest': ('created_at',),
     'code': ('unique_code',),
-    'last_program': ('-last_program_date', '-created_at'),
-    'last_active': ('-last_activity',),
+    'last_program': (F('last_program_date').desc(nulls_last=True), '-created_at'),
+    'last_active': (F('last_activity').desc(nulls_last=True),),
 }
 
 
@@ -154,7 +157,7 @@ class AthleteViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def trash(self, request):
-        qs = self._deleted_queryset().order_by('-deleted_at')
+        qs = annotate_athlete_queryset(self._deleted_queryset()).order_by('-deleted_at')
         page = self.paginate_queryset(qs)
         data = AthleteSerializer(page, many=True).data
         return self.get_paginated_response(data)
@@ -299,3 +302,42 @@ class AthleteViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], url_path='measurements/(?P<m_id>[0-9]+)/delete')
     def measurement_delete(self, request, pk=None, m_id=None):
         return self.measurement_detail(request, pk=pk, m_id=m_id)
+
+    @action(detail=True, methods=['get'], url_path='exercise_history')
+    def exercise_history(self, request, pk=None):
+        """Repeat history for one exercise: how often the student already did it.
+
+        `?exercise_id=X&exclude_program=Y` -> {count, last, programs: [...]}, newest first.
+        Drafts and final programmes count, archived (soft-deleted) ones do not.
+        """
+        athlete = self.get_object()
+        raw_exercise = (request.query_params.get('exercise_id') or '').strip()
+        raw_exclude = (request.query_params.get('exclude_program') or '').strip()
+        if not raw_exercise.isdigit():
+            return Response({'detail': 'exercise_id لازم است.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(build_exercise_history(
+            athlete,
+            int(raw_exercise),
+            int(raw_exclude) if raw_exclude.isdigit() else None,
+        ))
+
+    @action(detail=True, methods=['get'], url_path='frequent_exercises')
+    def frequent_exercises(self, request, pk=None):
+        """Top 10 exercises of a student, for the «حرکات پرتکرار» section."""
+        athlete = self.get_object()
+        return Response({'exercises': frequent_exercise_list(athlete)})
+
+    @action(detail=True, methods=['get'], url_path='repeat_counts')
+    def repeat_counts(self, request, pk=None):
+        """`?exercise_ids=1,2,3` -> {counts: {"1": 10, ...}} for «تکرار ×۱۰» badges."""
+        athlete = self.get_object()
+        raw = (request.query_params.get('exercise_ids') or '').replace(' ', '')
+        ids = [int(part) for part in raw.split(',') if part.isdigit()]
+        raw_exclude = (request.query_params.get('exclude_program') or '').strip()
+        counts = build_repeat_counts(
+            athlete,
+            ids or None,
+            int(raw_exclude) if raw_exclude.isdigit() else None,
+        )
+        return Response({'counts': {str(key): value for key, value in counts.items()}})
+

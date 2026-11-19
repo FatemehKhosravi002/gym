@@ -5,6 +5,7 @@ export interface MeasurementPoint {
   date: string
   weight_kg: number
   height_cm?: number | null
+  note?: string
 }
 
 export const LEVEL_OPTIONS = [

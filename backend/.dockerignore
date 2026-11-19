@@ -1,0 +1,12 @@
+# Never bake local secrets / dev state into the production image
+.env
+.env.*
+dev.sqlite3
+*.sqlite3
+media/
+staticfiles/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/

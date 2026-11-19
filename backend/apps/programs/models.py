@@ -22,7 +22,12 @@ class Program(models.Model):
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_DRAFT)
     share_token = models.CharField(max_length=64, unique=True, blank=True)
+    shared_at = models.DateTimeField(null=True, blank=True)
     is_archived = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,6 +37,7 @@ class Program(models.Model):
         indexes = [
             models.Index(fields=['athlete', 'created_at']),
             models.Index(fields=['share_token']),
+            models.Index(fields=['coach', 'deleted_at']),
         ]
 
     def save(self, *args, **kwargs):

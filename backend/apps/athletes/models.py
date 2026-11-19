@@ -5,11 +5,17 @@ import unicodedata
 from django.conf import settings
 from django.db import models
 
+DIGIT_TRANSLATION = str.maketrans(
+    '۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩',
+    '01234567890123456789',
+)
+
 
 def normalize_persian(text: str) -> str:
     """Normalize Persian/Arabic text for tolerant search.
 
     * Arabic yeh/kaf -> Persian yeh/kaf (ي -> ی, ك -> ک)
+    * Persian/Arabic digits -> ASCII digits (so a code typed on a phone keyboard matches)
     * removes ZWNJ (نیم‌فاصله), tatweel, diacritics and punctuation
     * collapses whitespace, lowercases latin
     """
@@ -17,6 +23,7 @@ def normalize_persian(text: str) -> str:
         return ''
     text = unicodedata.normalize('NFKC', str(text)).lower()
     text = text.replace('ي', 'ی').replace('ك', 'ک').replace('ى', 'ی')
+    text = text.translate(DIGIT_TRANSLATION)
     text = text.replace('\u200c', ' ').replace('\u200d', ' ').replace('\u0640', '')
     kept = []
     for ch in text:

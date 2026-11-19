@@ -20,7 +20,7 @@ RUN sed -i 's|http://deb.debian.org|https://mirror.arvancloud.ir|g' /etc/apt/sou
     fonts-noto-core \
     && rm -rf /var/lib/apt/lists/*
 
-COPY fonts/ /usr/local/share/fonts/vazirmatn/
+COPY fonts/ /usr/local/share/fonts/physique/
 RUN fc-cache -f
 
 WORKDIR /app

@@ -6,6 +6,7 @@ import Card from '../components/Card'
 import Input from '../components/Input'
 import JalaliDatePicker from '../components/JalaliDatePicker'
 import ProgramStructureEditor, { type EditorDay, type EditorItem } from '../components/ProgramStructureEditor'
+import { AthleteNoteBanner } from '../components/AthleteNote'
 import { apiErrorMessage } from '../utils/apiError'
 import { toJalali } from '../utils/jalali'
 import { toPersianDigits } from '../utils/persianDigits'
@@ -222,6 +223,8 @@ export default function ProgramEdit() {
           <p className={notice.kind === 'error' ? 'text-ink-900 font-medium' : 'text-accent-700 font-medium'}>{notice.text}</p>
         </Card>
       )}
+
+      {program.athlete && <AthleteNoteBanner athleteId={program.athlete} />}
 
       <Card>
         <div className="space-y-3">

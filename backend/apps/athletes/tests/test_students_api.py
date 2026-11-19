@@ -71,6 +71,20 @@ class SearchTests(StudentApiBase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual([row['last_name'] for row in res.json()], ['نوری'])
 
+    def test_search_by_code_with_persian_or_arabic_digits(self):
+        athlete = self.make_athlete('کد', 'دیجیتال', phone='۰۹۱۲۳۴۵۶۷۸۹')
+        persian = athlete.unique_code.translate(str.maketrans('0123456789', '۰۱۲۳۴۵۶۷۸۹'))
+        arabic = athlete.unique_code.translate(str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩'))
+        for query in (persian, arabic):
+            res = self.client.get(BASE, {'search': query})
+            self.assertEqual(self.names(res), ['دیجیتال'], query)
+        self.assertEqual(self.names(self.client.get(BASE, {'search': '09123456789'})), ['دیجیتال'])
+
+    def test_search_matches_note_tags(self):
+        self.make_athlete('زخمی', 'زانو', note_tags=['آسیب زانو'])
+        res = self.client.get(BASE, {'search': 'آسیب زانو'})
+        self.assertEqual(self.names(res), ['زانو'])
+
 
 class FilterTests(StudentApiBase):
     def setUp(self):
@@ -109,6 +123,11 @@ class FilterTests(StudentApiBase):
         res = self.client.get(BASE, {'ordering': '-last_active'})
         self.assertEqual(res.status_code, 200)
 
+    def test_ordering_by_last_program_puts_students_without_programs_last(self):
+        rows = self.client.get(BASE, {'ordering': 'last_program', 'page_size': 50}).json()['results']
+        self.assertEqual(rows[0]['last_name'], 'برنامه‌دار')
+        self.assertIsNone(rows[-1]['last_program_date'])
+
     def test_list_card_payload(self):
         res = self.client.get(BASE, {'has_programs': '1'})
         row = res.json()['results'][0]
@@ -146,6 +165,30 @@ class PermissionTests(StudentApiBase):
         res = self.client.delete(f'{BASE}{foreign.pk}/measurements/{m.pk}/')
         self.assertEqual(res.status_code, 404)
         self.assertTrue(Measurement.objects.filter(pk=m.pk, deleted_at__isnull=True).exists())
+
+    def test_measurement_patch_from_other_coach_blocked(self):
+        foreign = self.make_athlete('دیگر', 'مربی', coach=self.other)
+        m = Measurement.objects.create(athlete=foreign, date=timezone.localdate(), weight_kg=Decimal('70'))
+        res = self.client.patch(f'{BASE}{foreign.pk}/measurements/{m.pk}/', {'weight_kg': '75'}, format='json')
+        self.assertEqual(res.status_code, 404)
+        m.refresh_from_db()
+        self.assertEqual(m.weight_kg, Decimal('70'))
+
+    def test_restore_and_purge_of_foreign_student_blocked(self):
+        foreign = self.make_athlete('دیگر', 'مربی', coach=self.other)
+        foreign.deleted_at = timezone.now()
+        foreign.save(update_fields=['deleted_at'])
+        self.assertEqual(self.client.post(f'{BASE}{foreign.pk}/restore/').status_code, 404)
+        res = self.client.post(f'{BASE}{foreign.pk}/purge/', {'confirm_code': foreign.unique_code}, format='json')
+        self.assertEqual(res.status_code, 400)
+        self.assertTrue(Athlete.objects.filter(pk=foreign.pk).exists())
+
+    def test_deleted_student_is_hidden_from_measurements_api(self):
+        own = self.make_athlete('حذف', 'شده')
+        Measurement.objects.create(athlete=own, date=timezone.localdate(), weight_kg=Decimal('70'))
+        self.assertEqual(self.client.delete(f'{BASE}{own.pk}/').status_code, 200)
+        self.assertEqual(self.client.get(f'{BASE}{own.pk}/measurements/').status_code, 404)
+        self.assertEqual(self.client.get(f'{BASE}{own.pk}/').status_code, 404)
 
 
 class MeasurementTests(StudentApiBase):
@@ -214,6 +257,12 @@ class TrashTests(StudentApiBase):
         restored = self.client.post(f'{self.url}restore/')
         self.assertEqual(restored.status_code, 200)
         self.assertEqual(self.names(self.client.get(BASE)), ['زباله'])
+
+    def test_trash_payload_has_deleted_at(self):
+        self.client.delete(self.url)
+        row = self.client.get(BASE + 'trash/').json()['results'][0]
+        self.assertIsNotNone(row['deleted_at'])
+        self.assertIn('has_note', row)
 
     def test_purge_requires_exact_code(self):
         self.client.delete(self.url)

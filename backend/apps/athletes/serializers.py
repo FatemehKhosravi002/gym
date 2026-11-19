@@ -21,10 +21,10 @@ class AthleteSerializer(serializers.ModelSerializer):
         model = Athlete
         fields = [
             'id', 'first_name', 'last_name', 'unique_code', 'phone', 'level', 'level_display',
-            'goal', 'note_tags', 'has_note', 'coach', 'coach_name', 'created_at',
+            'goal', 'note_tags', 'has_note', 'coach', 'coach_name', 'created_at', 'deleted_at',
             'last_program_date', 'programs_count',
         ]
-        read_only_fields = ['unique_code', 'coach']
+        read_only_fields = ['unique_code', 'coach', 'deleted_at']
 
     def get_last_program_date(self, obj):
         value = getattr(obj, 'last_program_date', None)

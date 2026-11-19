@@ -44,7 +44,7 @@ export default function MeasurementSheet({
     setHeight(
       measurement?.height_cm ? String(measurement.height_cm) : lastHeight ? String(lastHeight) : '',
     )
-    setNote('')
+    setNote(measurement?.note || '')
   }, [open, measurement, lastWeight, lastHeight, today])
 
   const save = async (e: React.FormEvent) => {
@@ -57,7 +57,9 @@ export default function MeasurementSheet({
     const payload: Record<string, unknown> = { date, weight_kg: weightNumber }
     const heightNumber = Number(height.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))))
     if (height.trim()) payload.height_cm = heightNumber
-    if (note.trim()) payload.note = note.trim()
+    else if (measurement) payload.height_cm = null
+    // On edit an empty note must clear the previous value; on create it is simply omitted.
+    if (note.trim() || measurement) payload.note = note.trim()
 
     setSaving(true)
     setErrors({})

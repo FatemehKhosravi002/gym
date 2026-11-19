@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Athletes from './pages/Athletes'
 import AthleteDetail from './pages/AthleteDetail'
+import AthletesTrash from './pages/AthletesTrash'
 import ProgramBuilder from './pages/ProgramBuilder'
 import ProgramDetail from './pages/ProgramDetail'
 import ProgramEdit from './pages/ProgramEdit'
@@ -42,9 +43,11 @@ function AppRoutes() {
         <Route path="/change-password" element={token ? <Layout><ChangePassword /></Layout> : <Navigate to="/login" />} />
         <Route path="/dashboard" element={<PrivateRoute><Layout><Dashboard /></Layout></PrivateRoute>} />
         <Route path="/athletes" element={<PrivateRoute><Layout><Athletes /></Layout></PrivateRoute>} />
+        <Route path="/athletes/trash" element={<PrivateRoute><Layout><AthletesTrash /></Layout></PrivateRoute>} />
         <Route path="/athletes/:id" element={<PrivateRoute><Layout><AthleteDetail /></Layout></PrivateRoute>} />
         <Route path="/programs/:id" element={<PrivateRoute><Layout><ProgramDetail /></Layout></PrivateRoute>} />
-        <Route path="/programs/:id/edit" element={<PrivateRoute><Layout><ProgramEdit /></Layout></PrivateRoute>} />
+        <Route path="/programs/:id/edit" element={<PrivateRoute><Layout><ProgramBuilder /></Layout></PrivateRoute>} />
+        <Route path="/programs/:id/structure" element={<PrivateRoute><Layout><ProgramEdit /></Layout></PrivateRoute>} />
         <Route path="/templates" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
         <Route path="/templates/new" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />
         <Route path="/templates/:id/edit" element={<PrivateRoute><Layout><Templates /></Layout></PrivateRoute>} />

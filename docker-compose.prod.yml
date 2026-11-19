@@ -24,8 +24,8 @@ services:
       - media_data_prod:/app/media
       - static_data_prod:/app/staticfiles
     env_file:
+      # Single source of truth for every container (see .env.example.prod).
       - .env
-      - ./backend/.env.production
     depends_on:
       db:
         condition: service_healthy

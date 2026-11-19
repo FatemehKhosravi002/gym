@@ -50,6 +50,12 @@ class LibraryFullTest(TestCase):
         day = ProgramDay.objects.create(program=p, day_index=1)
         ProgramItem.objects.create(program_day=day, exercise=ex, order=0)
         res = self.client.delete(f'/api/library/exercises/{ex.id}/')
+        self.assertEqual(res.status_code, 409)
+        self.assertEqual(res.data['usage_count'], 1)
+        ex.refresh_from_db()
+        self.assertTrue(Exercise.objects.filter(pk=ex.pk).exists())
+        # the coach can fall back to disabling it
+        self.assertEqual(self.client.post(f'/api/library/exercises/{ex.id}/deactivate/').status_code, 200)
         ex.refresh_from_db()
         self.assertFalse(ex.is_active)
 

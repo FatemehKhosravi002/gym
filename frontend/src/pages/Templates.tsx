@@ -4,8 +4,11 @@ import api from '../utils/api'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import Input from '../components/Input'
+import Modal from '../components/Modal'
+import { useToast } from '../components/Toast'
 import ProgramStructureEditor, { type EditorDay, type EditorItem } from '../components/ProgramStructureEditor'
 import { apiErrorMessage } from '../utils/apiError'
+import { AlertIcon } from '../components/icons'
 import { toJalali } from '../utils/jalali'
 import { toPersianDigits } from '../utils/persianDigits'
 
@@ -36,11 +39,17 @@ function daysSummary(template: any): string {
 
 function TemplateList() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [templates, setTemplates] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState<Notice>(null)
   const [applyingTo, setApplyingTo] = useState<any>(null)
+  const [menuFor, setMenuFor] = useState<any>(null)
+  const [renaming, setRenaming] = useState<{ template: any; name: string } | null>(null)
+  const [renameError, setRenameError] = useState('')
+  const [deleting, setDeleting] = useState<any>(null)
+  const [working, setWorking] = useState<'rename' | 'duplicate' | 'delete' | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -55,16 +64,71 @@ function TemplateList() {
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    const timer = setTimeout(() => { load() }, 0)
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  const removeTemplate = async (template: any) => {
-    if (!window.confirm(`قالب «${template.name}» حذف شود؟`)) return
+  const removeTemplate = async () => {
+    if (!deleting) return
+    const removed = deleting
+    setWorking('delete')
     try {
-      await api.delete(`/program-templates/${template.id}/`)
-      setTemplates(list => list.filter(t => t.id !== template.id))
-      setNotice({ kind: 'ok', text: 'قالب حذف شد' })
+      await api.delete(`/program-templates/${removed.id}/`)
+      setDeleting(null)
+      setTemplates(list => list.filter(t => t.id !== removed.id))
+      toast.show({
+        message: `قالب «${removed.name}» حذف شد`,
+        actionLabel: 'واگرد',
+        onAction: async () => {
+          try {
+            await api.post(`/program-templates/${removed.id}/restore/`)
+            load()
+          } catch {
+            toast.error('بازگردانی قالب انجام نشد')
+          }
+        },
+      })
     } catch (e) {
       setNotice({ kind: 'error', text: apiErrorMessage(e, 'قالب حذف نشد') })
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const duplicateTemplate = async (template: any) => {
+    setMenuFor(null)
+    setWorking('duplicate')
+    try {
+      const res = await api.post(`/program-templates/${template.id}/duplicate/`)
+      setTemplates(list => [res.data, ...list])
+      toast.success(`«${res.data.name}» ساخته شد`)
+    } catch (e) {
+      setNotice({ kind: 'error', text: apiErrorMessage(e, 'کپی قالب انجام نشد') })
+    } finally {
+      setWorking(null)
+    }
+  }
+
+  const renameTemplate = async () => {
+    if (!renaming) return
+    const name = renaming.name.trim()
+    if (!name) {
+      setRenameError('نام قالب الزامی است')
+      return
+    }
+    setWorking('rename')
+    setRenameError('')
+    try {
+      const res = await api.patch(`/program-templates/${renaming.template.id}/`, { name })
+      setTemplates(list => list.map(t => (t.id === res.data.id ? { ...t, ...res.data } : t)))
+      toast.success('نام قالب تغییر کرد')
+      setRenaming(null)
+    } catch (e) {
+      setRenameError(apiErrorMessage(e, 'تغییر نام انجام نشد'))
+    } finally {
+      setWorking(null)
     }
   }
 
@@ -98,31 +162,109 @@ function TemplateList() {
       <div className="space-y-2">
         {templates.map(template => (
           <Card key={template.id}>
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="font-medium text-ink-900">{template.name}</p>
-                <p className="text-sm text-ink-600 mt-1">{daysSummary(template)}</p>
-                <p className="text-sm text-ink-600">
-                  ساخته‌شده در {toJalali(template.created_at)}
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate font-bold text-ink-900">{template.name}</p>
+                <p className="mt-1 text-sm text-ink-600">
+                  {typeof template.days_count === 'number'
+                    ? `${toPersianDigits(template.days_count)} روز • ${toPersianDigits(template.items_count || 0)} حرکت`
+                    : daysSummary(template)}
                 </p>
+                <p className="text-xs text-ink-500">ساخته‌شده در {toJalali(template.created_at)}</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Link to={`/templates/${template.id}/edit`}>
-                  <Button variant="secondary" size="sm">ویرایش</Button>
-                </Link>
-                <Button size="sm" onClick={() => setApplyingTo(template)}>استفاده برای ورزشکار</Button>
-                <Button variant="tertiary" size="sm" onClick={() => removeTemplate(template)}>حذف</Button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setMenuFor(template)}
+                aria-label={`کارهای بیشتر برای ${template.name}`}
+                aria-haspopup="menu"
+                className="h-11 w-11 shrink-0 rounded-full text-lg font-bold text-ink-600 hover:bg-surface-2 hover:text-ink-900"
+              >
+                ⋯
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setApplyingTo(template)}>استفاده برای ورزشکار</Button>
+              <Link to={`/templates/${template.id}/edit`}>
+                <Button variant="outline" size="sm">ویرایش</Button>
+              </Link>
             </div>
           </Card>
         ))}
       </div>
 
+      <Modal open={menuFor !== null} onClose={() => setMenuFor(null)} title={menuFor?.name} variant="sheet">
+        {menuFor && (
+          <div className="space-y-1">
+            <Button
+              variant="ghost"
+              fullWidth
+              loading={working === 'duplicate'}
+              onClick={() => duplicateTemplate(menuFor)}
+            >
+              کپی قالب
+            </Button>
+            <Button
+              variant="ghost"
+              fullWidth
+              onClick={() => {
+                setRenameError('')
+                setRenaming({ template: menuFor, name: menuFor.name })
+                setMenuFor(null)
+              }}
+            >
+              تغییر نام
+            </Button>
+            <Button
+              variant="ghost"
+              fullWidth
+              onClick={() => { setDeleting(menuFor); setMenuFor(null) }}
+            >
+              حذف قالب
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={renaming !== null}
+        onClose={() => setRenaming(null)}
+        title="تغییر نام قالب"
+        variant="sheet"
+        footer={
+          <div className="flex gap-2">
+            <Button variant="outline" fullWidth onClick={() => setRenaming(null)}>انصراف</Button>
+            <Button fullWidth loading={working === 'rename'} onClick={renameTemplate}>ذخیره</Button>
+          </div>
+        }
+      >
+        <Input
+          label="نام قالب"
+          value={renaming?.name || ''}
+          error={renameError}
+          onChange={(event) => setRenaming(current => current ? { ...current, name: event.target.value } : current)}
+          autoFocus
+        />
+      </Modal>
+
+      <Modal
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        title="حذف قالب؟"
+        description="قالب حذف می‌شود ولی با «واگرد» در پیام پایین صفحه قابل بازگردانی است. برنامه‌های ساخته‌شده از آن دست نمی‌خورند."
+        variant="dialog"
+        footer={
+          <div className="flex gap-2">
+            <Button variant="outline" fullWidth onClick={() => setDeleting(null)}>انصراف</Button>
+            <Button variant="danger" fullWidth loading={working === 'delete'} onClick={removeTemplate}>حذف</Button>
+          </div>
+        }
+      />
+
       {applyingTo && (
         <ApplyTemplateModal
           template={applyingTo}
           onClose={() => setApplyingTo(null)}
-          onApplied={(programId) => navigate(`/programs/${programId}`)}
+          onApplied={(programId) => navigate(`/programs/${programId}/edit`)}
         />
       )}
     </div>
@@ -196,6 +338,13 @@ function ApplyTemplateModal({ template, onClose, onApplied }: { template: any; o
             >
               <span className="font-medium">{athlete.first_name} {athlete.last_name}</span>
               <span className="text-sm text-ink-600"> • کد {toPersianDigits(athlete.unique_code)}</span>
+              {athlete.has_note && (
+                <span className="mt-1 flex items-center gap-1 text-xs font-semibold text-warning-700">
+                  <AlertIcon className="h-3.5 w-3.5" />
+                  یادداشت محدودیت
+                  {(athlete.note_tags || []).length > 0 ? `: ${(athlete.note_tags || []).join('، ')}` : ''}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -450,6 +599,28 @@ function TemplateCreate() {
 
       <Card>
         <form onSubmit={submit} className="space-y-4">
+          <div>
+            <p className="mb-2 text-sm font-semibold text-ink-700">شروع سریع (کمتر از یک دقیقه)</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: 'مبتدی ۳ روزه', name: 'قالب مبتدی ۳ روزه', days: 3 },
+                { label: 'حجم ۴ روزه', name: 'قالب حجم ۴ روزه', days: 4 },
+                { label: 'کات ۵ روزه', name: 'قالب کات ۵ روزه', days: 5 },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => {
+                    setForm({ ...form, name: preset.name })
+                    setDaysPerWeek(preset.days)
+                  }}
+                  className="min-h-[44px] rounded-pill border border-border-strong bg-surface px-3 text-sm font-semibold text-ink-700 hover:border-primary-600"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Input label="نام قالب" placeholder="مثال: برنامه حجم ۳ روزه" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <div>
             <p className="text-sm text-ink-600 mb-2">تعداد روز در هفته</p>
